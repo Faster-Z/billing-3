@@ -1387,4 +1387,4 @@ def bot_delete_coupon():
 
 if __name__=='__main__':
     if not os.path.exists(DATA_FILE): save_data(DEFAULT_DATA)
-    app.run(debug=True,port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
