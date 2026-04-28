@@ -7,7 +7,7 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = False  # set True in production with HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = 86400 * 7  # 7 days
-app.run(host="0.0.0.0", port=5000, degub=True)
+app.run(host="0.0.0.0", port=5000, debug=True)
 DATA_FILE = 'data.json'
 
 DEFAULT_DATA = {
