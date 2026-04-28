@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Login — StrengthCloud</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--pu:#8b5cf6;--cy:#06b6d4;--bg:#02040f;--card:rgba(10,15,35,0.9);--border:rgba(139,92,246,0.15);--text:#f1f5f9;--muted:rgba(255,255,255,0.4)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 70% at 50% 50%,rgba(139,92,246,0.07),transparent);pointer-events:none}
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(139,92,246,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,0.04) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.card{background:var(--card);backdrop-filter:blur(40px);border:1px solid var(--border);border-radius:20px;padding:42px;width:100%;max-width:395px;position:relative;box-shadow:0 30px 100px rgba(0,0,0,0.6)}
+.card::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:1px;background:linear-gradient(90deg,transparent,rgba(139,92,246,0.5),transparent)}
+.logo{display:flex;align-items:center;gap:9px;justify-content:center;margin-bottom:6px}
+.logo img{width:36px;height:36px;border-radius:50%;box-shadow:0 0 18px rgba(139,92,246,0.4)}
+.brand{font-family:'Orbitron',monospace;font-size:0.95rem;font-weight:900}.brand .t1{color:#fff}.brand .t2{background:linear-gradient(90deg,#8b5cf6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.admin-tag{display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:99px;padding:3px 12px;font-size:0.68rem;font-weight:800;color:rgba(139,92,246,0.9);letter-spacing:0.1em;margin:8px auto 14px;width:fit-content}
+h2{font-family:'Orbitron',monospace;font-size:1.3rem;font-weight:900;text-align:center;margin-bottom:4px}
+.sub{text-align:center;color:var(--muted);font-size:0.82rem;margin-bottom:26px}
+.fg{margin-bottom:13px}.fg label{display:block;font-size:0.68rem;font-weight:800;margin-bottom:5px;color:rgba(255,255,255,0.5);letter-spacing:0.12em;text-transform:uppercase}
+.fg input{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:11px 14px;font-size:0.9rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;transition:all .2s}
+.fg input:focus{border-color:rgba(139,92,246,0.5);box-shadow:0 0 0 3px rgba(139,92,246,0.1)}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;padding:13px;border-radius:10px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;border:none;margin-top:5px;transition:all .2s;box-shadow:0 4px 22px rgba(139,92,246,0.32)}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 30px rgba(139,92,246,0.48)}
+.err{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:9px 13px;color:#ef4444;font-size:0.82rem;margin-bottom:13px}
+.back{text-align:center;margin-top:16px;font-size:0.82rem;color:var(--muted)}.back a{color:rgba(139,92,246,0.7);font-weight:600}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="card">
+  <div class="logo"><img src="https://cdn.discordapp.com/icons/1416472559104299210/6299f0c15609e8680791202bfa89df74.webp?size=64" onerror="this.style.display='none'"><div class="brand"><span class="t1">Strength</span><span class="t2">Cloud</span></div></div>
+  <div class="admin-tag">🔐 ADMIN ACCESS</div>
+  <h2>Admin <span style="background:linear-gradient(135deg,#8b5cf6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Login</span></h2>
+  <div class="sub">Restricted — authorized personnel only</div>
+  {% if error %}<div class="err">⚠️ {{ error }}</div>{% endif %}
+  <form method="POST">
+    <div class="fg"><label>Username</label><input name="username" placeholder="admin" required autofocus></div>
+    <div class="fg"><label>Password</label><input type="password" name="password" placeholder="••••••••" required></div>
+    <button type="submit" class="btn">Access Panel →</button>
+  </form>
+  <div class="back"><a href="/home">← Back to site</a></div>
+</div>
+</body>
+</html>

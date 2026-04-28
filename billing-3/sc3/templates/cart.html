@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Cart — StrengthCloud{% endblock %}
+{% block head %}
+<style>
+.cart-page{max-width:900px;margin:0 auto;padding:48px 32px}
+.cart-header{margin-bottom:32px}
+.cart-header h1{font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:900}
+.cart-layout{display:grid;grid-template-columns:1fr 340px;gap:24px}
+@media(max-width:768px){.cart-layout{grid-template-columns:1fr}}
+.cart-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;transition:all .2s}
+.cart-item:hover{border-color:rgba(139,92,246,0.25)}
+.ci-left{display:flex;align-items:center;gap:14px}
+.ci-icon{width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(6,182,212,0.15));display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.ci-name{font-weight:800;font-size:0.95rem;margin-bottom:2px}
+.ci-meta{font-size:0.78rem;color:var(--muted)}
+.ci-right{display:flex;align-items:center;gap:14px}
+.ci-price{font-family:'Orbitron',monospace;font-weight:700;color:var(--pu);font-size:1.05rem}
+.ci-remove{width:32px;height:32px;border-radius:8px;border:1px solid rgba(239,68,68,0.2);background:rgba(239,68,68,0.08);color:#ef4444;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.9rem;transition:all .2s}
+.ci-remove:hover{background:rgba(239,68,68,0.18)}
+.empty{text-align:center;padding:60px 0;color:var(--muted)}
+.summary-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;position:sticky;top:88px}
+.summary-card h3{font-family:'Orbitron',monospace;font-size:0.95rem;font-weight:700;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.sum-row{display:flex;justify-content:space-between;margin-bottom:12px;font-size:0.875rem;color:var(--muted2)}
+.sum-row.total{font-weight:800;font-size:1rem;color:var(--text);border-top:1px solid var(--border);padding-top:14px;margin-top:8px}
+.sum-row.total span:last-child{font-family:'Orbitron',monospace;color:var(--pu);font-size:1.1rem}
+.coupon-row{display:flex;gap:8px;margin:16px 0}
+.coupon-row input{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:9px;padding:10px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:0.875rem;outline:none}
+.coupon-row input:focus{border-color:rgba(139,92,246,0.5)}
+.discount-row{display:flex;justify-content:space-between;color:#10b981;font-size:0.875rem;font-weight:700;margin-top:4px}
+</style>
+{% endblock %}
+{% block content %}
+<div class="cart-page">
+  <div class="cart-header">
+    <div class="section-label" style="justify-content:flex-start;margin-bottom:8px">Shopping</div>
+    <h1>Your <span class="grad-text">Cart</span></h1>
+  </div>
+
+  {% if cart_items %}
+  <div class="cart-layout">
+    <div>
+      {% for item in cart_items %}
+      <div class="cart-item" id="ci-{{ loop.index0 }}">
+        <div class="ci-left">
+          <div class="ci-icon">{% if item.type=='vps' %}🖥️{% else %}⛏️{% endif %}</div>
+          <div>
+            <div class="ci-name">{{ item.plan.name }} Plan</div>
+            <div class="ci-meta">{{ item.billing.capitalize() }} billing · {{ item.plan.ram }} RAM · {{ item.plan.cpu }} CPU</div>
+            {% if item.type == 'mc' and item.egg_type %}
+            <div class="ci-meta" style="margin-top:3px;color:rgba(139,92,246,0.85)">🥚 {{ item.egg_type|capitalize }} · 🎮 {{ item.mc_version or 'latest' }}</div>
+            {% endif %}
+            {% if item.type == 'vps' and item.vps_os %}
+            <div class="ci-meta" style="margin-top:3px;color:rgba(6,182,212,0.85)">🖥️ {{ item.vps_os }}</div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="ci-right">
+          <div class="ci-price">₹{{ item.price }}</div>
+          <form method="POST" action="/cart/remove" style="display:none" id="rf-{{ loop.index0 }}">
+            <input type="hidden" name="index" value="{{ loop.index0 }}">
+          </form>
+          <button class="ci-remove" onclick="removeItem({{ loop.index0 }})">✕</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div>
+      <div class="summary-card">
+        <h3>Order Summary</h3>
+        <div class="sum-row"><span>Subtotal</span><span>₹{{ total }}</span></div>
+        <div class="coupon-row">
+          <input type="text" id="couponInput" placeholder="Coupon code" style="text-transform:uppercase">
+          <button class="btn btn-primary btn-sm" onclick="applyCoupon()">Apply</button>
+        </div>
+        <div id="discountRow" style="display:none" class="discount-row"><span>Discount</span><span id="discAmt">-₹0</span></div>
+        <div class="sum-row total"><span>Total</span><span id="finalTotal">₹{{ total }}</span></div>
+        {% if user %}
+        <a href="/checkout" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px">Proceed to Checkout →</a>
+        {% else %}
+        <a href="/login" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px">Login to Checkout →</a>
+        {% endif %}
+        <a href="/minecraft-hosting" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px">← Continue Shopping</a>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="empty">
+    <div style="font-size:3rem;margin-bottom:16px">🛒</div>
+    <p style="font-size:1.1rem;font-weight:700;margin-bottom:8px">Your cart is empty</p>
+    <p style="margin-bottom:24px">Browse our plans and find the perfect fit.</p>
+    <a href="/minecraft-hosting" class="btn btn-primary">View Plans →</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let subtotal={{ total }};
+let discount=0;
+function removeItem(idx){
+  fetch('/cart/remove',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({index:idx})})
+  .then(r=>r.json()).then(()=>location.reload());
+}
+function applyCoupon(){
+  const code=document.getElementById('couponInput').value.trim().toUpperCase();
+  if(!code)return;
+  fetch('/checkout/apply-coupon',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})})
+  .then(r=>r.json()).then(d=>{
+    if(d.success){
+      discount=d.type==='percent'?Math.round(subtotal*d.discount/100):d.discount;
+      document.getElementById('discountRow').style.display='flex';
+      document.getElementById('discAmt').textContent='-₹'+discount;
+      document.getElementById('finalTotal').textContent='₹'+Math.max(0,subtotal-discount);
+      showToast('✅ Coupon applied! Saving ₹'+discount);
+    } else {
+      showToast('❌ '+d.error,'error');
+    }
+  });
+}
+</script>
+{% endblock %}

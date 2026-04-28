@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StrengthCloud</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@400;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#02040f}
+body{display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif}
+canvas{position:fixed;inset:0;z-index:0}
+.wrap{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:28px}
+.hex-wrap{position:relative;width:140px;height:140px}
+.hex-wrap svg.hex-ring{position:absolute;inset:0;width:100%;height:100%;animation:spinCW 4s linear infinite}
+.hex-wrap svg.hex-ring2{position:absolute;inset:5px;width:calc(100% - 10px);height:calc(100% - 10px);animation:spinCCW 6s linear infinite}
+@keyframes spinCW{to{transform:rotate(360deg)}}
+@keyframes spinCCW{to{transform:rotate(-360deg)}}
+.logo-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.logo-inner img{width:70px;height:70px;border-radius:50%;filter:drop-shadow(0 0 20px rgba(139,92,246,0.8))}
+.brand{font-family:'Orbitron',monospace;font-size:2.4rem;font-weight:900;letter-spacing:0.06em;text-align:center}
+.brand .s1{color:#fff}
+.brand .s2{background:linear-gradient(135deg,#8b5cf6,#06b6d4,#8b5cf6);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 3s linear infinite}
+@keyframes shimmer{0%{background-position:0%}100%{background-position:200%}}
+.sub{color:rgba(255,255,255,0.35);font-size:0.75rem;letter-spacing:0.35em;text-transform:uppercase;font-weight:700}
+.prog-wrap{width:260px;display:flex;flex-direction:column;gap:8px}
+.prog-bar{height:2px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#8b5cf6,#06b6d4);border-radius:99px;width:0;animation:prog 2.6s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes prog{0%{width:0}55%{width:72%}85%{width:92%}100%{width:100%}}
+.prog-label{display:flex;justify-content:space-between;align-items:center}
+.prog-text{color:rgba(255,255,255,0.25);font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase}
+.prog-pct{color:rgba(139,92,246,0.7);font-family:'Orbitron',monospace;font-size:0.7rem}
+.glow-orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;animation:driftOrb 8s ease-in-out infinite alternate}
+.g1{width:500px;height:500px;background:rgba(139,92,246,0.06);top:-100px;left:-100px}
+.g2{width:400px;height:400px;background:rgba(6,182,212,0.05);bottom:-80px;right:-80px;animation-delay:-4s}
+@keyframes driftOrb{0%{transform:translate(0,0)}100%{transform:translate(30px,20px)}}
+</style>
+</head>
+<body>
+<div class="glow-orb g1"></div>
+<div class="glow-orb g2"></div>
+<canvas id="c"></canvas>
+<div class="wrap">
+  <div class="hex-wrap">
+    <svg class="hex-ring" viewBox="0 0 100 100"><polygon points="50,3 96,27 96,73 50,97 4,73 4,27" fill="none" stroke="url(#g1)" stroke-width="1.5" stroke-dasharray="4 3"/><defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs></svg>
+    <svg class="hex-ring2" viewBox="0 0 100 100"><polygon points="50,3 96,27 96,73 50,97 4,73 4,27" fill="none" stroke="rgba(139,92,246,0.3)" stroke-width="1" stroke-dasharray="2 6"/></svg>
+    <div class="logo-inner"><img src="https://cdn.discordapp.com/icons/1416472559104299210/6299f0c15609e8680791202bfa89df74.webp?size=256" onerror="this.src=''"></div>
+  </div>
+  <div class="brand"><span class="s1">Strength</span><span class="s2">Cloud</span></div>
+  <div class="sub">Premium Hosting Infrastructure</div>
+  <div class="prog-wrap">
+    <div class="prog-label"><span class="prog-text" id="statusTxt">Booting systems...</span><span class="prog-pct" id="pctTxt">0%</span></div>
+    <div class="prog-bar"><div class="prog-fill"></div></div>
+  </div>
+</div>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+c.width=window.innerWidth;c.height=window.innerHeight;
+const pts=Array.from({length:80},()=>({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.5+.3}));
+function draw(){ctx.clearRect(0,0,c.width,c.height);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>c.width)p.vx*=-1;if(p.y<0||p.y>c.height)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(139,92,246,0.35)';ctx.fill();});pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<120){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(139,92,246,${.06*(1-d/120)})`;ctx.lineWidth=.5;ctx.stroke();}}));requestAnimationFrame(draw);}
+draw();
+const msgs=['Booting systems...','Loading NVMe drives...','Configuring DDoS shield...','Connecting to nodes...','Ready!'],pct=[0,28,55,82,100];let i=0;
+const st=document.getElementById('statusTxt'),pt=document.getElementById('pctTxt');
+const iv=setInterval(()=>{i++;if(i>=msgs.length){clearInterval(iv);return;}st.textContent=msgs[i];let cur=pct[i-1],tgt=pct[i];const tick=setInterval(()=>{cur++;pt.textContent=cur+'%';if(cur>=tgt)clearInterval(tick);},18);},560);
+setTimeout(()=>location.href='/home',3100);
+</script>
+</body>
+</html>

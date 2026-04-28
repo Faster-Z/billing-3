@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Minecraft Hosting Plans — StrengthCloud{% endblock %}
+{% block ng %}active{% endblock %}
+{% block head %}
+<style>
+.plans-hero{text-align:center;padding:58px 32px 36px;position:relative;overflow:hidden}
+.ph-glow{position:absolute;width:700px;height:350px;background:radial-gradient(ellipse,rgba(139,92,246,0.1),transparent);top:0;left:50%;transform:translateX(-50%);pointer-events:none}
+.ph-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(139,92,246,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,0.04) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 80% 80% at 50% 0%,black,transparent)}
+/* Coloured blobs */
+.ph-blob1{position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(139,92,246,0.09),transparent);top:-100px;left:-50px;filter:blur(60px)}
+.ph-blob2{position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(6,182,212,0.07),transparent);top:-50px;right:0;filter:blur(60px)}
+
+.billing-tabs{display:inline-flex;background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:4px;gap:3px;margin-bottom:44px}
+.bt{padding:8px 24px;border-radius:8px;cursor:pointer;font-weight:700;font-size:0.855rem;transition:all .22s;color:var(--muted);position:relative}
+.bt.active{background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;box-shadow:0 2px 14px rgba(139,92,246,0.4)}
+.save-pill{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#10b981,#059669);color:#fff;font-size:0.56rem;font-weight:800;padding:2px 7px;border-radius:99px;white-space:nowrap}
+
+.plans-grid{max-width:1300px;margin:0 auto;padding:0 16px 80px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:1150px){.plans-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.plans-grid{grid-template-columns:1fr;padding:0 12px 80px;gap:12px}}
+
+.plan-card{background:var(--card);border:1px solid var(--border);border-radius:18px;position:relative;overflow:hidden;transition:all .3s;display:flex;flex-direction:column}
+.plan-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc)}
+.plan-card:hover{transform:translateY(-5px);box-shadow:0 18px 52px rgba(0,0,0,0.45),0 0 0 1px rgba(139,92,246,0.12)}
+.plan-card.popular{border-color:rgba(139,92,246,0.38);box-shadow:0 0 40px rgba(139,92,246,0.09)}
+.plan-card.sold-out{opacity:0.65;pointer-events:none}
+
+/* Plan emoji banner */
+.plan-emoji-banner{width:100%;height:88px;background:linear-gradient(135deg,var(--acc2,rgba(139,92,246,0.1)),rgba(6,182,212,0.04));display:flex;align-items:center;justify-content:center;font-size:3rem;border-bottom:1px solid rgba(255,255,255,0.05);position:relative;overflow:hidden;transition:all .3s}
+.plan-card:hover .plan-emoji-banner{background:linear-gradient(135deg,var(--acc2,rgba(139,92,246,0.16)),rgba(6,182,212,0.07))}
+.plan-emoji-banner .e-glow{position:absolute;inset:0;background:radial-gradient(circle at 50% 60%,var(--acc2,rgba(139,92,246,0.18)),transparent 70%)}
+.plan-emoji-banner .e-ico{position:relative;z-index:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.4));line-height:1}
+
+/* Badges */
+.plan-badges{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:4px;z-index:2}
+.badge-pop{background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;font-size:0.58rem;font-weight:800;padding:3px 8px;border-radius:99px;letter-spacing:0.08em}
+.badge-sold{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:0.58rem;font-weight:800;padding:3px 8px;border-radius:99px;letter-spacing:0.08em}
+.badge-sale{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:0.58rem;font-weight:800;padding:3px 8px;border-radius:99px;letter-spacing:0.08em}
+
+.plan-body{padding:18px;flex:1;display:flex;flex-direction:column}
+.plan-name{font-family:'Orbitron',monospace;font-size:0.95rem;font-weight:900;margin-bottom:3px;letter-spacing:0.02em}
+.plan-desc{font-size:0.76rem;color:var(--muted);line-height:1.4;margin-bottom:14px}
+.spec-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.82rem}
+.spec-row:last-of-type{border-bottom:none}
+.spec-label{color:var(--muted)}
+.spec-val{font-weight:700;font-family:'JetBrains Mono',monospace;font-size:0.78rem}
+.plan-price{margin:15px 0 13px;display:flex;align-items:flex-end;gap:3px}
+.p-curr{font-family:'Orbitron',monospace;font-size:0.95rem;color:var(--pu);font-weight:700;line-height:1.9}
+.p-amt{font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;color:var(--pu);line-height:1}
+.p-orig{font-family:'Orbitron',monospace;font-size:1rem;color:var(--muted);text-decoration:line-through;margin-left:6px;line-height:1.4}
+.p-per{font-size:0.72rem;color:var(--muted);margin-left:2px;margin-bottom:4px}
+.btn-add{width:100%;padding:10px;border-radius:9px;font-family:'Syne',sans-serif;font-size:0.855rem;font-weight:700;cursor:pointer;border:1px solid rgba(139,92,246,0.22);background:rgba(139,92,246,0.08);color:#fff;transition:all .22s;margin-top:auto}
+.btn-add:hover{background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-color:transparent;box-shadow:0 4px 18px rgba(139,92,246,0.32)}
+.btn-add.sold{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.2);color:#ef4444;cursor:not-allowed}
+</style>
+{% endblock %}
+{% block content %}
+<div class="plans-hero">
+  <div class="ph-grid"></div>
+  <div class="ph-glow"></div>
+  <div class="ph-blob1"></div>
+  <div class="ph-blob2"></div>
+  <div class="section-label">Minecraft Hosting</div>
+  <div class="section-title" style="font-size:2.4rem">Choose Your <span class="grad-text">Minecraft Plan</span></div>
+  <p style="color:var(--muted2);margin:10px auto 26px;max-width:500px">All plans include DDoS protection, unlimited databases, and instant setup.</p>
+  {% if data.sale and data.sale.active %}
+  <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:99px;padding:6px 16px;margin-bottom:20px;font-size:0.8rem;font-weight:700;color:#ef4444">
+    🔥 {{ data.sale.label }} — {{ data.sale.percent }}% OFF ALL PLANS!
+  </div>
+  {% endif %}
+  <div class="billing-tabs">
+    <div class="bt active" onclick="setTab('monthly',this)">Monthly</div>
+    <div style="position:relative"><div class="bt" onclick="setTab('yearly',this)">Yearly<span class="save-pill">SAVE 17%</span></div></div>
+    <div class="bt" onclick="setTab('lifetime',this)">Lifetime</div>
+  </div>
+</div>
+
+<div class="plans-grid">
+  {% for p in data.plans %}
+  {% set sale_active = data.sale and data.sale.active %}
+  <div class="plan-card {% if p.popular %}popular{% endif %} {% if p.sold_out %}sold-out{% endif %}" style="--acc:linear-gradient(90deg,{{ p.color }},{{ p.color }}88);--acc2:{{ p.color }}22">
+    <div class="plan-badges">
+      {% if p.popular and not p.sold_out %}<span class="badge-pop">★ POPULAR</span>{% endif %}
+      {% if p.sold_out %}<span class="badge-sold">⛔ SOLD OUT</span>{% endif %}
+      {% if sale_active and not p.sold_out %}<span class="badge-sale">🔥 {{ data.sale.percent }}% OFF</span>{% endif %}
+    </div>
+
+    <div class="plan-emoji-banner" style="--acc2:{{ p.color }}22">
+      <div class="e-glow"></div>
+      <div class="e-ico">{{ p.emoji if p.emoji else '⛏️' }}</div>
+    </div>
+
+    <div class="plan-body">
+      <div class="plan-name">{{ p.name }} Plan</div>
+      {% if p.description %}<div class="plan-desc">{{ p.description }}</div>{% endif %}
+      <div class="spec-row"><span class="spec-label">RAM</span><span class="spec-val" style="color:{{ p.color }}">{{ p.ram }}</span></div>
+      <div class="spec-row"><span class="spec-label">CPU</span><span class="spec-val">{{ p.cpu }}</span></div>
+      <div class="spec-row"><span class="spec-label">Storage</span><span class="spec-val">{{ p.storage }}</span></div>
+      <div class="spec-row"><span class="spec-label">Database</span><span class="spec-val">Unlimited</span></div>
+      <div class="spec-row"><span class="spec-label">DDoS</span><span class="spec-val" style="color:#10b981">Free</span></div>
+
+      <div class="plan-price">
+        <span class="p-curr">₹</span>
+        <span class="p-amt" data-monthly="{{ p.price_monthly }}" data-yearly="{{ p.price_yearly }}" data-lifetime="{{ p.price_lifetime }}"
+          {% if sale_active %}
+          data-sale-monthly="{{ (p.price_monthly * (100 - data.sale.percent) / 100)|int }}"
+          data-sale-yearly="{{ (p.price_yearly * (100 - data.sale.percent) / 100)|int }}"
+          data-sale-lifetime="{{ (p.price_lifetime * (100 - data.sale.percent) / 100)|int }}"
+          {% endif %}
+        >{% if sale_active %}{{ (p.price_monthly * (100 - data.sale.percent) / 100)|int }}{% else %}{{ p.price_monthly }}{% endif %}</span>
+        {% if sale_active %}<span class="p-orig" data-orig-monthly="{{ p.price_monthly }}" data-orig-yearly="{{ p.price_yearly }}" data-orig-lifetime="{{ p.price_lifetime }}">{{ p.price_monthly }}</span>{% endif %}
+        <span class="p-per per-lab">/month</span>
+      </div>
+
+      {% if p.sold_out %}
+      <button class="btn-add sold" disabled>⛔ Sold Out</button>
+      {% else %}
+      <button class="btn-add" data-pid="{{ p.id }}" data-name="{{ p.name }}" onclick="addToCart({{ p.id }},currentBilling,'{{ p.name }}','mc')">Add to Cart</button>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let currentBilling='monthly';
+const labels={monthly:'/month',yearly:'/year',lifetime:'one-time'};
+const saleActive={{ 'true' if data.sale and data.sale.active else 'false' }};
+function setTab(tab,el){
+  currentBilling=tab;
+  document.querySelectorAll('.bt').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.p-amt').forEach(el=>{
+    el.textContent=saleActive?(el.dataset['sale'+tab.charAt(0).toUpperCase()+tab.slice(1)]||el.dataset[tab]):el.dataset[tab];
+  });
+  document.querySelectorAll('.p-orig').forEach(el=>{if(el)el.textContent=el.dataset['orig'+tab.charAt(0).toUpperCase()+tab.slice(1)]||el.dataset['origMonthly'];});
+  document.querySelectorAll('.per-lab').forEach(el=>{el.textContent=labels[tab]});
+}
+</script>
+{% endblock %}

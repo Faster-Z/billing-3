@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}VPS Servers — StrengthCloud{% endblock %}
+{% block nv %}active{% endblock %}
+{% block head %}
+<style>
+.vps-hero{text-align:center;padding:58px 32px 36px;position:relative;overflow:hidden}
+.vh-glow{position:absolute;width:700px;height:350px;background:radial-gradient(ellipse,rgba(6,182,212,0.1),transparent);top:0;left:50%;transform:translateX(-50%);pointer-events:none}
+.vps-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(6,182,212,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,0.04) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 80% 80% at 50% 0%,black,transparent)}
+.vblob1{position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(6,182,212,0.08),transparent);top:-100px;left:-50px;filter:blur(60px)}
+.vblob2{position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(139,92,246,0.06),transparent);top:-50px;right:0;filter:blur(60px)}
+
+.billing-tabs{display:inline-flex;background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:4px;gap:3px;margin-bottom:44px}
+.bt{padding:8px 24px;border-radius:8px;cursor:pointer;font-weight:700;font-size:0.855rem;transition:all .22s;color:var(--muted)}
+.bt.active{background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff;box-shadow:0 2px 14px rgba(6,182,212,0.4)}
+.save-pill{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#10b981,#059669);color:#fff;font-size:0.56rem;font-weight:800;padding:2px 7px;border-radius:99px;white-space:nowrap}
+
+.vps-grid-plans{max-width:1300px;margin:0 auto;padding:0 16px 80px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:1050px){.vps-grid-plans{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){
+  .vps-grid-plans{grid-template-columns:1fr;padding:0 12px 80px;gap:12px}
+  .vps-card{width:100%;min-width:0;overflow:hidden}
+  .vps-hero{padding:40px 16px 24px}
+  .billing-tabs{margin-bottom:24px;width:100%;max-width:320px}
+  .os-list{flex-wrap:wrap}
+  .os-pill{font-size:0.6rem;padding:2px 6px}
+  .vps-features{grid-template-columns:1fr 1fr;padding:0 12px 40px}
+  .p-amt{font-size:1.7rem}
+}
+
+.vps-card{background:var(--card);border:1px solid var(--border);border-radius:18px;position:relative;overflow:hidden;transition:all .3s;display:flex;flex-direction:column}
+.vps-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--vacc)}
+.vps-card:hover{transform:translateY(-5px);box-shadow:0 18px 52px rgba(0,0,0,0.45),0 0 0 1px rgba(6,182,212,0.12)}
+.vps-card.popular{border-color:rgba(6,182,212,0.38);box-shadow:0 0 40px rgba(6,182,212,0.09)}
+.vps-card.sold-out{opacity:0.6;pointer-events:none}
+
+.vps-emoji-banner{width:100%;height:95px;display:flex;align-items:center;justify-content:center;font-size:3.2rem;border-bottom:1px solid rgba(255,255,255,0.05);position:relative;overflow:hidden;transition:all .3s}
+.vps-emoji-banner .e-glow{position:absolute;inset:0;background:radial-gradient(circle at 50% 60%,var(--vacc2,rgba(6,182,212,0.15)),transparent 70%)}
+.vps-emoji-banner .e-ico{position:relative;z-index:1;filter:drop-shadow(0 4px 14px rgba(0,0,0,0.4));line-height:1}
+.vps-card:hover .vps-emoji-banner{filter:brightness(1.1)}
+
+.plan-badges{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:4px;z-index:2}
+.badge-pop{background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff;font-size:0.58rem;font-weight:800;padding:3px 8px;border-radius:99px}
+.badge-sold{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:0.58rem;font-weight:800;padding:3px 8px;border-radius:99px}
+.badge-sale{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:0.58rem;font-weight:800;padding:3px 8px;border-radius:99px}
+
+.vps-body{padding:20px;flex:1;display:flex;flex-direction:column}
+.vps-name{font-family:'Orbitron',monospace;font-size:0.95rem;font-weight:900;margin-bottom:3px}
+.vps-desc{font-size:0.76rem;color:var(--muted);line-height:1.4;margin-bottom:14px}
+.spec-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.82rem}
+.spec-row:last-of-type{border-bottom:none}
+.spec-val{font-weight:700;font-family:'JetBrains Mono',monospace;font-size:0.78rem}
+.os-list{display:flex;flex-wrap:wrap;gap:4px;margin:12px 0}
+.os-pill{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:5px;padding:3px 8px;font-size:0.65rem;color:var(--muted2);font-family:'JetBrains Mono',monospace;font-weight:500}
+.os-ubuntu{background:rgba(232,106,40,0.12);border-color:rgba(232,106,40,0.3);color:#e86a28}
+.os-debian{background:rgba(165,0,93,0.12);border-color:rgba(165,0,93,0.3);color:#d9539a}
+.os-centos{background:rgba(96,193,82,0.12);border-color:rgba(96,193,82,0.3);color:#60c152}
+.os-win{background:rgba(0,120,212,0.12);border-color:rgba(0,120,212,0.3);color:#4da6f5}
+.vps-price{margin:14px 0 12px;display:flex;align-items:flex-end;gap:3px}
+.p-curr{font-family:'Orbitron',monospace;font-size:0.95rem;color:var(--cy);font-weight:700;line-height:1.9}
+.p-amt{font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;color:var(--cy);line-height:1}
+.p-orig{font-family:'Orbitron',monospace;font-size:1rem;color:var(--muted);text-decoration:line-through;margin-left:6px;line-height:1.4}
+.p-per{font-size:0.72rem;color:var(--muted);margin-left:2px;margin-bottom:4px}
+.btn-add-vps{width:100%;padding:10px;border-radius:9px;font-family:'Syne',sans-serif;font-size:0.855rem;font-weight:700;cursor:pointer;border:1px solid rgba(6,182,212,0.22);background:rgba(6,182,212,0.08);color:#fff;transition:all .22s;margin-top:auto}
+.btn-add-vps:hover{background:linear-gradient(135deg,#06b6d4,#0891b2);border-color:transparent;box-shadow:0 4px 18px rgba(6,182,212,0.3)}
+.btn-add-vps.sold{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.2);color:#ef4444;cursor:not-allowed}
+
+/* Features strip */
+.vps-features{max-width:1100px;margin:0 auto;padding:0 24px 60px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:800px){.vps-features{grid-template-columns:repeat(2,1fr)}}
+.vf-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:18px;text-align:center}
+.vf-icon{font-size:1.6rem;margin-bottom:9px}
+.vf-title{font-family:'Orbitron',monospace;font-size:0.75rem;font-weight:700;margin-bottom:4px}
+.vf-sub{font-size:0.75rem;color:var(--muted)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="vps-hero">
+  <div class="vps-grid"></div>
+  <div class="vh-glow"></div>
+  <div class="vblob1"></div>
+  <div class="vblob2"></div>
+  <div class="section-label" style="--pu:#06b6d4">VPS Servers</div>
+  <div class="section-title" style="font-size:2.4rem">Powerful <span style="background:linear-gradient(135deg,#06b6d4,#0891b2);-webkit-background-clip:text;-webkit-text-fill-color:transparent">VPS Plans</span></div>
+  <p style="color:var(--muted2);margin:10px auto 24px;max-width:520px">Full root access, NVMe storage, multiple OS options, instant provisioning.</p>
+  {% if data.sale and data.sale.active %}
+  <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:99px;padding:6px 16px;margin-bottom:20px;font-size:0.8rem;font-weight:700;color:#ef4444">
+    🔥 {{ data.sale.label }} — {{ data.sale.percent }}% OFF ALL PLANS!
+  </div>
+  {% endif %}
+  <div class="billing-tabs">
+    <div class="bt active" onclick="setVpsTab('monthly',this)">Monthly</div>
+    <div style="position:relative"><div class="bt" onclick="setVpsTab('yearly',this)">Yearly<span class="save-pill">SAVE 17%</span></div></div>
+  </div>
+</div>
+
+<div class="vps-grid-plans">
+  {% for p in data.vps_plans %}
+  {% set sale_active = data.sale and data.sale.active %}
+  <div class="vps-card {% if p.popular %}popular{% endif %} {% if p.sold_out %}sold-out{% endif %}" style="--vacc:linear-gradient(90deg,{{ p.color }},{{ p.color }}88)">
+    <div class="plan-badges">
+      {% if p.popular and not p.sold_out %}<span class="badge-pop">★ POPULAR</span>{% endif %}
+      {% if p.sold_out %}<span class="badge-sold">⛔ SOLD OUT</span>{% endif %}
+      {% if sale_active and not p.sold_out %}<span class="badge-sale">🔥 {{ data.sale.percent }}% OFF</span>{% endif %}
+    </div>
+
+    <div class="vps-emoji-banner" style="background:linear-gradient(135deg,{{ p.color }}18,{{ p.color }}06);--vacc2:{{ p.color }}22">
+      <div class="e-glow"></div>
+      <div class="e-ico">{{ p.emoji if p.emoji else '🖥️' }}</div>
+    </div>
+
+    <div class="vps-body">
+      <div class="vps-name">{{ p.name }}</div>
+      {% if p.description %}<div class="vps-desc">{{ p.description }}</div>{% endif %}
+      <div class="spec-row"><span style="color:var(--muted)">CPU</span><span class="spec-val" style="color:{{ p.color }}">{{ p.cpu_cores }} vCore{{ 's' if p.cpu_cores > 1 }}</span></div>
+      <div class="spec-row"><span style="color:var(--muted)">RAM</span><span class="spec-val" style="color:{{ p.color }}">{{ p.ram }}</span></div>
+      <div class="spec-row"><span style="color:var(--muted)">Storage</span><span class="spec-val">{{ p.storage }}</span></div>
+      <div class="spec-row"><span style="color:var(--muted)">Bandwidth</span><span class="spec-val">{{ p.bandwidth }}</span></div>
+      <div class="spec-row"><span style="color:var(--muted)">DDoS</span><span class="spec-val" style="color:#10b981">Free</span></div>
+      {% if p.os %}
+      <div class="os-list">
+        {% for os in p.os %}<span class="os-pill {% if 'Windows' in os %}os-win{% elif 'Ubuntu' in os %}os-ubuntu{% elif 'Debian' in os %}os-debian{% elif 'CentOS' in os %}os-centos{% endif %}">{{ os }}</span>{% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="vps-price">
+        <span class="p-curr">₹</span>
+        <span class="p-amt" data-monthly="{{ p.price_monthly }}" data-yearly="{{ p.price_yearly }}"
+          {% if sale_active %}
+          data-sale-monthly="{{ (p.price_monthly * (100 - data.sale.percent) / 100)|int }}"
+          data-sale-yearly="{{ (p.price_yearly * (100 - data.sale.percent) / 100)|int }}"
+          {% endif %}
+        >{% if sale_active %}{{ (p.price_monthly * (100-data.sale.percent)/100)|int }}{% else %}{{ p.price_monthly }}{% endif %}</span>
+        {% if sale_active %}<span class="p-orig" data-orig-monthly="{{ p.price_monthly }}" data-orig-yearly="{{ p.price_yearly }}">{{ p.price_monthly }}</span>{% endif %}
+        <span class="p-per vper-lab">/month</span>
+      </div>
+
+      {% if p.sold_out %}
+      <button class="btn-add-vps sold" disabled>⛔ Sold Out</button>
+      {% else %}
+      <button class="btn-add-vps" data-pid="{{ p.id }}" data-name="{{ p.name }}" data-os='{{ p.os | tojson }}' onclick="vpsAddToCart(this)">Add to Cart</button>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- VPS Feature strip -->
+<div class="vps-features">
+  <div class="vf-card"><div class="vf-icon">🔑</div><div class="vf-title">Full Root Access</div><div class="vf-sub">Complete control over your server</div></div>
+  <div class="vf-card"><div class="vf-icon">⚡</div><div class="vf-title">Instant Deploy</div><div class="vf-sub">Live within 60 seconds</div></div>
+  <div class="vf-card"><div class="vf-icon">💾</div><div class="vf-title">NVMe SSD</div><div class="vf-sub">Ultra-fast storage I/O</div></div>
+  <div class="vf-card"><div class="vf-icon">🛡️</div><div class="vf-title">DDoS Shield</div><div class="vf-sub">Free enterprise protection</div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let currentVpsBilling='monthly';
+const vLabels={monthly:'/month',yearly:'/year'};
+const saleModeV={{ 'true' if data.sale and data.sale.active else 'false' }};
+function setVpsTab(tab,el){
+  currentVpsBilling=tab;
+  document.querySelectorAll('.bt').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.p-amt').forEach(el=>{
+    el.textContent=saleModeV?(el.dataset['sale'+tab.charAt(0).toUpperCase()+tab.slice(1)]||el.dataset[tab]):el.dataset[tab];
+  });
+  document.querySelectorAll('.p-orig').forEach(el=>{if(el)el.textContent=el.dataset['orig'+tab.charAt(0).toUpperCase()+tab.slice(1)]||el.dataset['origMonthly'];});
+  document.querySelectorAll('.vper-lab').forEach(el=>{el.textContent=vLabels[tab]});
+}
+function vpsAddToCart(btn){
+  const pid=parseInt(btn.dataset.pid);
+  const name=btn.dataset.name;
+  let osOptions=[];
+  try{osOptions=JSON.parse(btn.dataset.os||'[]');}catch(e){}
+  addToCart(pid,currentVpsBilling,name,'vps',osOptions);
+}
+</script>
+{% endblock %}

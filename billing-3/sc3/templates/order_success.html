@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block title %}Order Confirmed — StrengthCloud{% endblock %}
+{% block head %}
+<style>
+.os-wrap{max-width:760px;margin:0 auto;padding:60px 24px 80px;text-align:center}
+/* Hero */
+.os-hero{margin-bottom:40px}
+.os-checkmark{width:80px;height:80px;background:linear-gradient(135deg,#10b981,#059669);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.4rem;margin:0 auto 20px;box-shadow:0 0 40px rgba(16,185,129,0.3);animation:pop .5s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes pop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.os-title{font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;margin-bottom:8px}
+.os-subtitle{color:var(--muted2);font-size:0.9rem;max-width:480px;margin:0 auto}
+
+/* Status pill */
+.status-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 18px;border-radius:99px;font-size:0.82rem;font-weight:800;letter-spacing:0.05em;margin:14px auto}
+.s-paid{background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#10b981}
+.s-pending{background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:#f59e0b}
+.s-active{background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.3);color:#22d3ee}
+
+/* Cards */
+.os-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;margin-bottom:16px;text-align:left;position:relative;overflow:hidden}
+.os-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.os-card.green::before{background:linear-gradient(90deg,#10b981,#059669)}
+.os-card.purple::before{background:linear-gradient(90deg,#8b5cf6,#06b6d4)}
+.os-card.amber::before{background:linear-gradient(90deg,#f59e0b,#ef4444)}
+.os-card h4{font-family:'Orbitron',monospace;font-size:0.82rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+/* Panel credentials */
+.cred-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.cred-grid{grid-template-columns:1fr}}
+.cred-box{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px}
+.cred-label{font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:5px}
+.cred-val{font-family:'JetBrains Mono',monospace;font-size:0.9rem;font-weight:700;color:#a78bfa;cursor:pointer;word-break:break-all;transition:color .18s}
+.cred-val:hover{color:#c4b5fd}
+.cred-copy{font-size:0.6rem;color:var(--muted);margin-top:2px}
+
+/* Server rows */
+.server-row{display:flex;align-items:center;gap:12px;padding:10px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.15);border-radius:10px;margin-bottom:8px}
+.server-row.failed{background:rgba(239,68,68,0.05);border-color:rgba(239,68,68,0.15)}
+.srv-ico{font-size:1.6rem;flex-shrink:0}
+.srv-name{font-weight:700;font-size:0.875rem}
+.srv-id{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted)}
+.srv-badge{margin-left:auto;font-size:0.65rem;font-weight:800;padding:3px 8px;border-radius:99px}
+.srv-ok{background:rgba(16,185,129,0.15);color:#10b981}
+.srv-fail{background:rgba(239,68,68,0.15);color:#ef4444}
+
+/* Order details */
+.od-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.84rem}
+.od-row:last-child{border-bottom:none}
+.od-row span:first-child{color:var(--muted2)}
+.od-row span:last-child{font-weight:700;font-family:'JetBrains Mono',monospace}
+
+/* Warning box */
+.warn-box{background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:14px;font-size:0.8rem;color:rgba(245,158,11,0.9);margin-bottom:14px;line-height:1.6}
+
+/* Actions */
+.os-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:24px}
+</style>
+{% endblock %}
+{% block content %}
+<div class="os-wrap">
+  <!-- Hero -->
+  <div class="os-hero">
+    <div class="os-checkmark">✓</div>
+    {% if order.status == 'active' or order.status == 'paid' %}
+    <div class="os-title">Payment Confirmed! 🎉</div>
+    <div class="os-subtitle">Your order has been placed and your server is being set up right now.</div>
+    <div class="status-pill s-paid">✅ PAYMENT CONFIRMED</div>
+    {% elif order.status == 'pending_verification' %}
+    <div class="os-title">Order Submitted! ⏳</div>
+    <div class="os-subtitle">We've received your order. We'll verify your payment and activate within 1 hour.</div>
+    <div class="status-pill s-pending">⏳ PENDING VERIFICATION</div>
+    {% else %}
+    <div class="os-title">Order Received!</div>
+    <div class="os-subtitle">Your order has been placed successfully.</div>
+    <div class="status-pill s-pending">📋 ORDER PLACED</div>
+    {% endif %}
+  </div>
+
+  <!-- Pterodactyl Panel Credentials (only if provisioned) -->
+  {% if order.ptero_provisioned and order.ptero_servers %}
+  <div class="os-card green">
+    <h4>🤖 Your Server is Ready!</h4>
+    <div class="warn-box">⚠️ <strong>Save these credentials now</strong> — the password is shown only once for security. You can change it after logging into the panel.</div>
+    <div class="cred-grid" style="margin-bottom:16px">
+      <div class="cred-box">
+        <div class="cred-label">Panel URL</div>
+        <div class="cred-val" onclick="copyText(this,'{{ ptero.panel_url }}')">{{ ptero.panel_url }}</div>
+        <div class="cred-copy">👆 Click to copy</div>
+      </div>
+      <div class="cred-box">
+        <div class="cred-label">Username</div>
+        <div class="cred-val" onclick="copyText(this,'{{ order.username }}')">{{ order.username }}</div>
+        <div class="cred-copy">👆 Click to copy</div>
+      </div>
+      <div class="cred-box">
+        <div class="cred-label">Password</div>
+        <div class="cred-val" onclick="copyText(this,'{{ order.ptero_password }}')">{{ order.ptero_password }}</div>
+        <div class="cred-copy">👆 Click to copy</div>
+      </div>
+      <div class="cred-box">
+        <div class="cred-label">Login Page</div>
+        <div class="cred-val" onclick="window.open('{{ ptero.panel_url }}','_blank')">Open Panel →</div>
+        <div class="cred-copy">👆 Click to open</div>
+      </div>
+    </div>
+
+    <!-- Servers -->
+    <div style="font-size:0.72rem;font-weight:800;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Provisioned Servers</div>
+    {% for srv in order.ptero_servers %}
+    <div class="server-row {% if not srv.success %}failed{% endif %}">
+      <div class="srv-ico">{{ '⛏️' if 'VPS' not in srv.plan else '🖥️' }}</div>
+      <div>
+        <div class="srv-name">{{ srv.plan }}</div>
+        <div class="srv-id">{{ srv.identifier if srv.identifier else (srv.error if srv.error else 'Provisioning...') }}</div>
+      </div>
+      <div class="srv-badge {{ 'srv-ok' if srv.success else 'srv-fail' }}">{{ '✓ LIVE' if srv.success else '✗ ERROR' }}</div>
+    </div>
+    {% endfor %}
+
+    <a href="{{ ptero.panel_url }}" target="_blank" class="btn btn-primary" style="margin-top:14px;width:100%;justify-content:center;display:flex">
+      🚀 Open Pterodactyl Panel
+    </a>
+  </div>
+  {% elif order.status == 'pending_verification' %}
+  <!-- Manual payment pending -->
+  <div class="os-card amber">
+    <h4>⏳ Payment Verification Pending</h4>
+    <div class="warn-box" style="background:transparent;border:none;padding:0">
+      We've received your order with UTR: <strong style="font-family:'JetBrains Mono',monospace">{{ order.utr_number or 'N/A' }}</strong><br><br>
+      Our team will verify your {{ order.payment_method|upper if order.payment_method else 'manual' }} payment and activate your server within <strong>1 hour</strong>.<br><br>
+      Once verified, you'll receive your Pterodactyl panel login credentials via dashboard.
+    </div>
+    <div style="font-size:0.8rem;color:var(--muted2)">💬 Need faster activation? Contact us on <a href="{{ data.site.discord }}" target="_blank" style="color:var(--pu)">Discord</a></div>
+  </div>
+  {% else %}
+  <!-- Generic pending -->
+  <div class="os-card purple">
+    <h4>🔧 Server Setup in Progress</h4>
+    <p style="font-size:0.84rem;color:var(--muted2);line-height:1.6">Your server is being configured. Login credentials will appear in your dashboard shortly.</p>
+  </div>
+  {% endif %}
+
+  <!-- Order Details -->
+  <div class="os-card purple">
+    <h4>📋 Order Details</h4>
+    <div class="od-row"><span>Order ID</span><span>#{{ order.id }}</span></div>
+    <div class="od-row"><span>Date</span><span>{{ order.date }}</span></div>
+    <div class="od-row"><span>Payment Method</span><span>{{ (order.payment_method or 'Manual')|upper }}</span></div>
+    {% if order.payment_id %}<div class="od-row"><span>Payment ID</span><span>{{ order.payment_id }}</span></div>{% endif %}
+    {% if order.utr_number %}<div class="od-row"><span>UTR Number</span><span>{{ order.utr_number }}</span></div>{% endif %}
+    {% for item in order_items %}
+    <div class="od-row">
+      <span>
+        {{ item.plan.name if item.plan is mapping else item.get('name','Item') }} ({{ item.billing|capitalize }})
+        {% if item.type == 'mc' and item.egg_type %}
+        <span style="display:block;font-size:0.72rem;color:rgba(139,92,246,0.8);margin-top:2px">🥚 {{ item.egg_type|capitalize }} · 🎮 {{ item.mc_version or 'latest' }}</span>
+        {% endif %}
+        {% if item.type == 'vps' and item.vps_os %}
+        <span style="display:block;font-size:0.72rem;color:rgba(6,182,212,0.8);margin-top:2px">🖥️ {{ item.vps_os }}</span>
+        {% endif %}
+      </span>
+      <span>₹{{ item.price }}</span>
+    </div>
+    {% endfor %}
+    {% if order.discount %}<div class="od-row" style="color:#10b981"><span>Discount ({{ order.coupon }})</span><span>-₹{{ order.discount }}</span></div>{% endif %}
+    <div class="od-row" style="font-weight:900;font-size:1rem;color:#fff">
+      <span>Total Paid</span>
+      <span style="font-family:'Orbitron',monospace;color:var(--pu)">₹{{ order.final }}</span>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="os-actions">
+    <a href="/dashboard" class="btn btn-primary">📊 View Dashboard</a>
+    <a href="/minecraft-hosting" class="btn btn-ghost">⛏️ Browse More Plans</a>
+    <a href="{{ data.site.discord }}" target="_blank" class="btn btn-ghost">💬 Discord Support</a>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function copyText(el, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = el.textContent;
+    el.textContent = '✅ Copied!';
+    el.style.color = '#10b981';
+    setTimeout(() => { el.textContent = orig; el.style.color = ''; }, 2000);
+  });
+}
+</script>
+{% endblock %}

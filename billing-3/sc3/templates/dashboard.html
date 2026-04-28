@@ -1,0 +1,518 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — StrengthCloud{% endblock %}
+{% block head %}
+<style>
+.dash-wrap{max-width:1100px;margin:0 auto;padding:44px 32px 80px}
+.dash-header{display:flex;align-items:center;gap:16px;margin-bottom:36px}
+.dash-avatar{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#8b5cf6,#06b6d4);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:1.6rem;font-weight:900;flex-shrink:0;box-shadow:0 0 30px rgba(139,92,246,0.35)}
+.dash-info h1{font-family:'Orbitron',monospace;font-size:1.5rem;font-weight:900}
+.dash-info p{color:var(--muted);font-size:0.875rem;margin-top:3px}
+.dash-grid{display:grid;grid-template-columns:260px 1fr;gap:24px}
+@media(max-width:768px){.dash-grid{grid-template-columns:1fr}}
+
+/* Sidebar */
+.dash-sidebar{display:flex;flex-direction:column;gap:5px}
+.ds-item{padding:11px 15px;border-radius:10px;cursor:pointer;font-size:0.875rem;font-weight:600;color:var(--muted2);transition:all .2s;display:flex;align-items:center;gap:10px;border:none;background:none;width:100%;text-align:left;text-decoration:none}
+.ds-item:hover{background:rgba(139,92,246,0.08);color:#fff}
+.ds-item.active{background:rgba(139,92,246,0.12);color:var(--pu);border-left:2px solid var(--pu);padding-left:13px}
+.ds-icon{width:22px;text-align:center;font-size:1rem;flex-shrink:0}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* Cards */
+.ic{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden}
+.ic::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#8b5cf6,#06b6d4)}
+.ic h3{font-family:'Orbitron',monospace;font-size:0.83rem;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:8px}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:0.7rem;font-weight:800;margin-bottom:5px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase}
+.fg input,.fg select{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:10px 14px;font-size:0.88rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;transition:border-color .18s;box-sizing:border-box}
+.fg input:focus{border-color:rgba(139,92,246,0.5)}
+.fg input:disabled{opacity:0.4;cursor:not-allowed}
+
+/* Stats */
+.stat-mini{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px}
+.sm-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(6,182,212,0.1));display:flex;align-items:center;justify-content:center;font-size:1.1rem;border:1px solid rgba(139,92,246,0.12);flex-shrink:0}
+.sm-val{font-family:'Orbitron',monospace;font-size:1.25rem;font-weight:700;color:var(--pu)}
+.sm-label{font-size:0.72rem;color:var(--muted);margin-top:1px}
+
+/* Order rows */
+.order-row{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:11px;padding:14px 18px;margin-bottom:8px;transition:border-color .2s}
+.order-row:hover{border-color:rgba(139,92,246,0.2)}
+.s-badge{padding:4px 10px;border-radius:99px;font-size:0.68rem;font-weight:800;letter-spacing:0.06em}
+.sb-active{background:rgba(16,185,129,0.12);color:#10b981}
+.sb-pending,.sb-pending_verification{background:rgba(245,158,11,0.12);color:#f59e0b}
+.sb-completed{background:rgba(99,102,241,0.12);color:#818cf8}
+.sb-cancelled{background:rgba(239,68,68,0.1);color:#ef4444}
+
+/* Server cards */
+.srv-card{background:rgba(139,92,246,0.04);border:1px solid rgba(139,92,246,0.15);border-radius:14px;padding:18px;margin-bottom:12px;transition:all .2s}
+.srv-card:hover{border-color:rgba(139,92,246,0.3);background:rgba(139,92,246,0.07)}
+.srv-card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.srv-name{font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:800}
+.srv-id{font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--muted);margin-top:2px}
+.srv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.srv-stat{background:rgba(255,255,255,0.03);border-radius:8px;padding:9px 10px}
+.srv-stat-v{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:0.88rem;color:#a78bfa}
+.srv-stat-l{font-size:0.64rem;color:var(--muted);margin-top:1px}
+.cred-box{background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.cred-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.8rem}
+.cred-row:last-child{border-bottom:none}
+.cred-label{color:var(--muted);font-weight:600;width:80px;flex-shrink:0}
+.cred-val{font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:#e2e8f0;word-break:break-all;flex:1;text-align:left;padding:0 8px}
+.cred-copy{background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.2);color:#a78bfa;border-radius:5px;padding:2px 8px;font-size:0.65rem;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap;transition:all .15s}
+.cred-copy:hover{background:rgba(139,92,246,0.25)}
+
+/* Ptero password change */
+.pw-toggle{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.78rem;font-weight:600;padding:0;display:flex;align-items:center;gap:4px;margin-top:6px;text-decoration:underline}
+.pw-toggle:hover{color:#a78bfa}
+.ptero-pw-form{background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.15);border-radius:10px;padding:14px;margin-top:10px;display:none}
+
+/* Messages */
+.ok-msg{background:rgba(16,185,129,0.09);border:1px solid rgba(16,185,129,0.22);border-radius:9px;padding:10px 14px;color:#10b981;font-size:0.82rem;margin-bottom:14px;display:none}
+.err-msg{background:rgba(239,68,68,0.09);border:1px solid rgba(239,68,68,0.22);border-radius:9px;padding:10px 14px;color:#ef4444;font-size:0.82rem;margin-bottom:14px;display:none}
+
+/* Panel link button */
+.panel-btn{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:0.8rem;font-weight:700;cursor:pointer;text-decoration:none;transition:all .2s;margin-top:6px}
+.panel-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(139,92,246,0.35)}
+.no-servers{text-align:center;padding:40px 20px;color:var(--muted)}
+.no-servers .ns-icon{font-size:3rem;margin-bottom:12px}
+</style>
+{% endblock %}
+{% block content %}
+<div class="dash-wrap">
+  <div class="dash-header">
+    <div class="dash-avatar">{{ user.username[0].upper() }}</div>
+    <div class="dash-info">
+      <h1>{{ user.username }}</h1>
+      <p>{{ user.email }} · Member since {% if user_data %}{{ user_data.joined }}{% else %}Today{% endif %}</p>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <!-- Sidebar -->
+    <div class="dash-sidebar">
+      <div class="ds-item active" onclick="switchTab('overview',this)"><span class="ds-icon">📊</span>Overview</div>
+      <div class="ds-item" onclick="switchTab('orders',this)"><span class="ds-icon">📦</span>My Orders</div>
+      <div class="ds-item" onclick="switchTab('servers',this)"><span class="ds-icon">⛏️</span>My MC Servers</div>
+      <div class="ds-item" onclick="switchTab('vps',this)"><span class="ds-icon">🖥️</span>My VPS</div>
+      <div class="ds-item" onclick="switchTab('profile',this)"><span class="ds-icon">👤</span>Edit Profile</div>
+      <div class="ds-item" onclick="switchTab('security',this)"><span class="ds-icon">🔐</span>Security</div>
+      <a href="/logout" class="ds-item" style="color:#ef4444;margin-top:16px"><span class="ds-icon">🚪</span>Logout</a>
+    </div>
+
+    <div>
+      <!-- ── OVERVIEW ── -->
+      <div id="tab-overview" class="tab-panel active">
+        <div class="g2" style="margin-bottom:18px">
+          <div class="stat-mini"><div class="sm-icon">📦</div><div><div class="sm-val">{{ orders|length }}</div><div class="sm-label">Total Orders</div></div></div>
+          <div class="stat-mini"><div class="sm-icon">🤖</div><div><div class="sm-val">{{ orders|selectattr('ptero_provisioned')|list|length }}</div><div class="sm-label">Active Servers</div></div></div>
+        </div>
+        {% set ptero_orders = orders|selectattr('ptero_provisioned')|list %}
+        {% if ptero_orders %}
+        <div class="ic" style="margin-bottom:18px">
+          <h3>🤖 Your Server Access</h3>
+          {% set o = ptero_orders[-1] %}
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <div>
+              <div style="font-weight:800;font-size:0.9rem">Pterodactyl Panel</div>
+              <div style="font-size:0.75rem;color:var(--muted);margin-top:2px">Log in to manage all your servers</div>
+            </div>
+            <a href="{{ data.pterodactyl.panel_url if data.pterodactyl.panel_url else '#' }}" target="_blank" class="panel-btn">🌐 Open Panel ↗</a>
+          </div>
+          <div class="cred-box" style="margin-top:14px">
+            <div class="cred-row"><span class="cred-label">Panel</span><span class="cred-val">{{ data.pterodactyl.panel_url or '—' }}</span><button class="cred-copy" onclick="cp(this,'{{ data.pterodactyl.panel_url or '' }}')">Copy</button></div>
+            <div class="cred-row"><span class="cred-label">Username</span><span class="cred-val">{{ user.username }}</span><button class="cred-copy" onclick="cp(this,'{{ user.username }}')">Copy</button></div>
+            <div class="cred-row"><span class="cred-label">Password</span><span class="cred-val" id="ov-ptero-pw">{{ o.ptero_password or '—' }}</span><button class="cred-copy" onclick="cp(this,'{{ o.ptero_password or '' }}')">Copy</button></div>
+          </div>
+          <div style="font-size:0.72rem;color:var(--muted)">⚠️ Change your panel password after first login. <button class="pw-toggle" onclick="switchTab('servers',document.querySelectorAll('.ds-item')[2])">→ Manage in My Servers</button></div>
+        </div>
+        {% endif %}
+        <div class="ic">
+          <h3>Recent Orders</h3>
+          {% if orders %}{% for o in orders[-3:]|reverse %}
+          <div class="order-row" style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:700;font-size:0.88rem">Order #{{ o.id % 100000 }}</div>
+              <div style="font-size:0.73rem;color:var(--muted)">{{ o.date }}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="font-family:'Orbitron',monospace;font-weight:700;color:var(--pu)">₹{{ o.final }}</div>
+              <span class="s-badge sb-{{ o.status }}">{{ o.status.upper().replace('_',' ') }}</span>
+            </div>
+          </div>
+          {% endfor %}{% else %}
+          <p style="color:var(--muted);font-size:0.875rem;text-align:center;padding:20px">No orders yet. <a href="/minecraft-hosting" style="color:var(--pu)">Browse plans →</a></p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ── ORDERS ── -->
+      <div id="tab-orders" class="tab-panel">
+        <div class="ic">
+          <h3>📦 All Orders</h3>
+          {% if orders %}{% for o in orders|reverse %}
+          <div class="order-row">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+              <div>
+                <div style="font-weight:800;font-size:0.9rem">Order #{{ o.id % 100000 }}</div>
+                <div style="font-size:0.73rem;color:var(--muted);margin-top:2px">{{ o.date }}</div>
+                {% for item in o['items'] %}<div style="font-size:0.73rem;color:var(--muted2);margin-top:1px">· {{ item.plan.name if item.plan is mapping else item.get('name','?') }} Plan ({{ item.billing }})</div>{% endfor %}
+              </div>
+              <div style="text-align:right">
+                <div style="font-family:'Orbitron',monospace;font-weight:700;color:var(--pu);margin-bottom:5px">₹{{ o.final }}</div>
+                <span class="s-badge sb-{{ o.status }}">{{ o.status.upper().replace('_',' ') }}</span>
+                {% if o.ptero_provisioned %}<div style="font-size:0.62rem;color:#10b981;margin-top:4px">🤖 Server ready</div>{% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}{% else %}
+          <p style="color:var(--muted);text-align:center;padding:28px">No orders yet.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ── MY SERVERS ── -->
+      <div id="tab-servers" class="tab-panel">
+        {% set ptero_orders = orders|selectattr('ptero_provisioned')|list %}
+        {% if ptero_orders %}
+          <!-- Panel Access Card -->
+          <div class="ic" style="background:linear-gradient(135deg,rgba(139,92,246,0.07),rgba(6,182,212,0.04))">
+            <h3>🌐 Panel Access</h3>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+              <div>
+                <div style="font-size:0.85rem;font-weight:700">Your Pterodactyl Panel</div>
+                <div style="font-size:0.73rem;color:var(--muted);margin-top:2px">Use these credentials to log in and manage your servers</div>
+              </div>
+              <a href="{{ data.pterodactyl.panel_url if data.pterodactyl.panel_url else '#' }}" target="_blank" class="panel-btn">🌐 Open Panel ↗</a>
+            </div>
+            <div class="cred-box">
+              <div class="cred-row">
+                <span class="cred-label">Panel URL</span>
+                <span class="cred-val">{{ data.pterodactyl.panel_url or '—' }}</span>
+                <button class="cred-copy" onclick="cp(this,'{{ data.pterodactyl.panel_url or '' }}')">📋 Copy</button>
+              </div>
+              <div class="cred-row">
+                <span class="cred-label">Username</span>
+                <span class="cred-val">{{ user.username }}</span>
+                <button class="cred-copy" onclick="cp(this,'{{ user.username }}')">📋 Copy</button>
+              </div>
+              <div class="cred-row">
+                <span class="cred-label">Password</span>
+                <span class="cred-val" id="ptero-pw-display">{{ ptero_orders[-1].ptero_password or '—' }}</span>
+                <button class="cred-copy" onclick="cp(this,'{{ ptero_orders[-1].ptero_password or '' }}')">📋 Copy</button>
+              </div>
+              <div class="cred-row">
+                <span class="cred-label">Email</span>
+                <span class="cred-val">{{ user.email }}</span>
+                <button class="cred-copy" onclick="cp(this,'{{ user.email }}')">📋 Copy</button>
+              </div>
+            </div>
+
+            <!-- Change Pterodactyl Password -->
+            <button class="pw-toggle" onclick="togglePteroForm()">🔑 Change panel password</button>
+            <div class="ptero-pw-form" id="pteroPwForm">
+              <div style="font-size:0.78rem;font-weight:700;color:#a78bfa;margin-bottom:10px">Change your Pterodactyl panel password</div>
+              <div class="fg"><label>New Panel Password</label><input type="password" id="ptero-new-pw" placeholder="Min 8 characters" minlength="8"></div>
+              <div class="fg" style="margin:0"><label>Confirm Password</label><input type="password" id="ptero-confirm-pw" placeholder="Repeat password"></div>
+              <div id="pteroPwMsg" style="font-size:0.78rem;font-weight:700;margin:8px 0;display:none"></div>
+              <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="changePteroPassword()">Update Panel Password</button>
+            </div>
+          </div>
+
+          <!-- Individual Server Cards -->
+          {% for o in ptero_orders|reverse %}
+            {% if o.ptero_servers %}
+              {% for srv in o.ptero_servers %}
+              {% if srv.success %}
+              <div class="srv-card">
+                <div class="srv-card-head">
+                  <div>
+                    <div class="srv-name">🖥️ {{ srv.plan }} Server</div>
+                    <div class="srv-id">ID: {{ srv.identifier or srv.server_id or '—' }}</div>
+                  </div>
+                  <span class="s-badge sb-active">✅ ACTIVE</span>
+                </div>
+                <div class="srv-grid">
+                  {% set plan_item = o['items'][loop.index0] if loop.index0 < o['items']|length else {} %}
+                  {% set plan_data = plan_item.plan if plan_item and plan_item.plan is mapping else {} %}
+                  <div class="srv-stat"><div class="srv-stat-v">{{ plan_data.get('ram','—') if plan_data else '—' }}</div><div class="srv-stat-l">RAM</div></div>
+                  <div class="srv-stat"><div class="srv-stat-v">{{ plan_data.get('cpu','—') if plan_data else '—' }}</div><div class="srv-stat-l">CPU</div></div>
+                  <div class="srv-stat"><div class="srv-stat-v">{{ plan_data.get('storage','—') if plan_data else '—' }}</div><div class="srv-stat-l">Storage</div></div>
+                </div>
+                <a href="{{ data.pterodactyl.panel_url }}/server/{{ srv.identifier }}" target="_blank" class="panel-btn" style="font-size:0.78rem;padding:7px 13px">
+                  🎮 Manage Server ↗
+                </a>
+              </div>
+              {% endif %}
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+
+        {% else %}
+          <div class="ic">
+            <div class="no-servers">
+              <div class="ns-icon">🖥️</div>
+              <div style="font-weight:800;font-size:1rem;margin-bottom:8px">No servers yet</div>
+              <div style="font-size:0.82rem;color:var(--muted2);margin-bottom:20px">Purchase a plan and your server will appear here after admin confirms payment.</div>
+              <a href="/minecraft-hosting" class="btn btn-primary">Browse Minecraft Plans</a>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- ── MY VPS ── -->
+      <div id="tab-vps" class="tab-panel">
+        {% set vps_orders = orders|selectattr('cpanel_provisioned')|list %}
+        {% if vps_orders %}
+          {% set latest_vps = vps_orders[-1] %}
+          {% set cpd = latest_vps.cpanel_details or {} %}
+
+          <!-- VPS Access Card -->
+          <div class="ic" style="background:linear-gradient(135deg,rgba(6,182,212,0.07),rgba(59,130,246,0.04));border-color:rgba(6,182,212,0.2)">
+            <h3 style="color:#22d3ee">🖥️ VPS Control Panel Access</h3>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+              <div>
+                <div style="font-size:0.85rem;font-weight:700">cPanel Dashboard</div>
+                <div style="font-size:0.73rem;color:var(--muted);margin-top:2px">Log in to manage files, databases, email, SSL</div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <a href="{{ cpd.cp_url or '#' }}" target="_blank" class="panel-btn" style="background:linear-gradient(135deg,#06b6d4,#0891b2)">🌐 cPanel ↗</a>
+                <a href="{{ cpd.whm_url or '#' }}" target="_blank" class="panel-btn" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);font-size:0.75rem;padding:8px 13px">⚙️ WHM ↗</a>
+              </div>
+            </div>
+
+            <!-- Credentials -->
+            <div class="cred-box">
+              <div class="cred-row">
+                <span class="cred-label">cPanel URL</span>
+                <span class="cred-val">{{ cpd.cp_url or '—' }}</span>
+                <button class="cred-copy" onclick="cp(this,'{{ cpd.cp_url or '' }}')">📋 Copy</button>
+              </div>
+              <div class="cred-row">
+                <span class="cred-label">Username</span>
+                <span class="cred-val">{{ cpd.cp_username or '—' }}</span>
+                <button class="cred-copy" onclick="cp(this,'{{ cpd.cp_username or '' }}')">📋 Copy</button>
+              </div>
+              <div class="cred-row">
+                <span class="cred-label">Password</span>
+                <span class="cred-val" id="cp-pw-disp">{{ cpd.cp_password or '—' }}</span>
+                <button class="cred-copy" onclick="cp(this,'{{ cpd.cp_password or '' }}')">📋 Copy</button>
+              </div>
+              <div class="cred-row">
+                <span class="cred-label">Domain</span>
+                <span class="cred-val">{{ cpd.cp_domain or '—' }}</span>
+                <button class="cred-copy" onclick="cp(this,'{{ cpd.cp_domain or '' }}')">📋 Copy</button>
+              </div>
+              <div class="cred-row">
+                <span class="cred-label">IP Address</span>
+                <span class="cred-val">{{ cpd.ip or '—' }}</span>
+                <button class="cred-copy" onclick="cp(this,'{{ cpd.ip or '' }}')">📋 Copy</button>
+              </div>
+            </div>
+
+            <!-- Change cPanel Password -->
+            <button class="pw-toggle" onclick="toggleCpForm()">🔑 Change cPanel password</button>
+            <div class="ptero-pw-form" id="cpPwForm">
+              <div style="font-size:0.78rem;font-weight:700;color:#22d3ee;margin-bottom:10px">Change your cPanel password</div>
+              <div class="fg"><label>New Password</label><input type="password" id="cp-new-pw" placeholder="Min 8 characters" minlength="8"></div>
+              <div class="fg" style="margin:0"><label>Confirm Password</label><input type="password" id="cp-confirm-pw" placeholder="Repeat password"></div>
+              <div id="cpPwMsg" style="font-size:0.78rem;font-weight:700;margin:8px 0;display:none"></div>
+              <button class="btn btn-sm" style="margin-top:10px;background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff;border:none;cursor:pointer;border-radius:9px;padding:9px 16px;font-weight:700" onclick="changeCpanelPassword()">Update cPanel Password</button>
+            </div>
+          </div>
+
+          <!-- Nameserver Info -->
+          <div class="ic">
+            <h3>🌐 Nameservers & DNS</h3>
+            <div style="font-size:0.78rem;color:var(--muted2);margin-bottom:12px">Point your domain to these nameservers to use it with your VPS</div>
+            <div class="cred-box">
+              <div class="cred-row">
+                <span class="cred-label">NS1</span>
+                <span class="cred-val">{{ cpd.nameserver1 or '—' }}</span>
+                <button class="cred-copy" onclick="cp(this,'{{ cpd.nameserver1 or '' }}')">📋 Copy</button>
+              </div>
+              <div class="cred-row">
+                <span class="cred-label">NS2</span>
+                <span class="cred-val">{{ cpd.nameserver2 or '—' }}</span>
+                <button class="cred-copy" onclick="cp(this,'{{ cpd.nameserver2 or '' }}')">📋 Copy</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Links Card -->
+          <div class="ic">
+            <h3>⚡ Quick Access</h3>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+              <a href="{{ cpd.cp_url or '#' }}/frontend/jupiter/filemanager/" target="_blank" style="background:rgba(6,182,212,0.07);border:1px solid rgba(6,182,212,0.2);border-radius:11px;padding:14px;text-align:center;text-decoration:none;transition:all .2s;display:block" onmouseover="this.style.background='rgba(6,182,212,0.15)'" onmouseout="this.style.background='rgba(6,182,212,0.07)'">
+                <div style="font-size:1.5rem;margin-bottom:6px">📁</div>
+                <div style="font-size:0.78rem;font-weight:700;color:#e2e8f0">File Manager</div>
+              </a>
+              <a href="{{ cpd.cp_url or '#' }}/frontend/jupiter/phpmyadmin/index.live.php" target="_blank" style="background:rgba(6,182,212,0.07);border:1px solid rgba(6,182,212,0.2);border-radius:11px;padding:14px;text-align:center;text-decoration:none;transition:all .2s;display:block" onmouseover="this.style.background='rgba(6,182,212,0.15)'" onmouseout="this.style.background='rgba(6,182,212,0.07)'">
+                <div style="font-size:1.5rem;margin-bottom:6px">🗄️</div>
+                <div style="font-size:0.78rem;font-weight:700;color:#e2e8f0">phpMyAdmin</div>
+              </a>
+              <a href="{{ cpd.cp_url or '#' }}/frontend/jupiter/mail/index.html" target="_blank" style="background:rgba(6,182,212,0.07);border:1px solid rgba(6,182,212,0.2);border-radius:11px;padding:14px;text-align:center;text-decoration:none;transition:all .2s;display:block" onmouseover="this.style.background='rgba(6,182,212,0.15)'" onmouseout="this.style.background='rgba(6,182,212,0.07)'">
+                <div style="font-size:1.5rem;margin-bottom:6px">📧</div>
+                <div style="font-size:0.78rem;font-weight:700;color:#e2e8f0">Email Accounts</div>
+              </a>
+              <a href="{{ cpd.cp_url or '#' }}/frontend/jupiter/ssl/index.html" target="_blank" style="background:rgba(6,182,212,0.07);border:1px solid rgba(6,182,212,0.2);border-radius:11px;padding:14px;text-align:center;text-decoration:none;transition:all .2s;display:block" onmouseover="this.style.background='rgba(6,182,212,0.15)'" onmouseout="this.style.background='rgba(6,182,212,0.07)'">
+                <div style="font-size:1.5rem;margin-bottom:6px">🔒</div>
+                <div style="font-size:0.78rem;font-weight:700;color:#e2e8f0">SSL / HTTPS</div>
+              </a>
+              <a href="{{ cpd.cp_url or '#' }}/frontend/jupiter/softaculous/index.live.php" target="_blank" style="background:rgba(6,182,212,0.07);border:1px solid rgba(6,182,212,0.2);border-radius:11px;padding:14px;text-align:center;text-decoration:none;transition:all .2s;display:block" onmouseover="this.style.background='rgba(6,182,212,0.15)'" onmouseout="this.style.background='rgba(6,182,212,0.07)'">
+                <div style="font-size:1.5rem;margin-bottom:6px">🚀</div>
+                <div style="font-size:0.78rem;font-weight:700;color:#e2e8f0">Softaculous</div>
+              </a>
+              <a href="{{ cpd.cp_url or '#' }}/frontend/jupiter/backup/index.html" target="_blank" style="background:rgba(6,182,212,0.07);border:1px solid rgba(6,182,212,0.2);border-radius:11px;padding:14px;text-align:center;text-decoration:none;transition:all .2s;display:block" onmouseover="this.style.background='rgba(6,182,212,0.15)'" onmouseout="this.style.background='rgba(6,182,212,0.07)'">
+                <div style="font-size:1.5rem;margin-bottom:6px">💾</div>
+                <div style="font-size:0.78rem;font-weight:700;color:#e2e8f0">Backups</div>
+              </a>
+            </div>
+          </div>
+
+        {% else %}
+          <div class="ic">
+            <div class="no-servers">
+              <div class="ns-icon">🖥️</div>
+              <div style="font-weight:800;font-size:1rem;margin-bottom:8px">No VPS yet</div>
+              <div style="font-size:0.82rem;color:var(--muted2);margin-bottom:20px">Purchase a VPS plan and your cPanel access will appear here after admin activates it.</div>
+              <a href="/vps" class="btn btn-primary" style="background:linear-gradient(135deg,#06b6d4,#0891b2);border:none">Browse VPS Plans →</a>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- ── PROFILE ── -->
+      <div id="tab-profile" class="tab-panel">
+        <div class="ic">
+          <h3>👤 Edit Profile</h3>
+          <div id="profileOk" class="ok-msg">✅ Profile updated!</div>
+          <div class="fg"><label>First Name</label><input id="p-fname" value="{{ user_data.fname if user_data else '' }}"></div>
+          <div class="fg"><label>Last Name</label><input id="p-lname" value="{{ user_data.lname if user_data else '' }}"></div>
+          <div class="fg"><label>Email</label><input type="email" id="p-email" value="{{ user.email }}"></div>
+          <div class="fg"><label>Username (cannot change)</label><input value="{{ user.username }}" disabled></div>
+          <button class="btn btn-primary" onclick="saveProfile()">💾 Save Changes</button>
+        </div>
+      </div>
+
+      <!-- ── SECURITY ── -->
+      <div id="tab-security" class="tab-panel">
+        <div class="ic">
+          <h3>🔐 Change Password</h3>
+          <div id="pwOk" class="ok-msg">✅ Password changed!</div>
+          <div id="pwErr" class="err-msg"></div>
+          <div class="fg"><label>Current Password</label><input type="password" id="pw-current" placeholder="••••••••"></div>
+          <div class="fg"><label>New Password</label><input type="password" id="pw-new" placeholder="Min 6 characters"></div>
+          <div class="fg"><label>Confirm Password</label><input type="password" id="pw-confirm" placeholder="Repeat new password"></div>
+          <button class="btn btn-primary" onclick="changePassword()">🔒 Update Password</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab-panel').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ds-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+function cp(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = orig, 1800);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy', 1800);
+  });
+}
+
+function toggleCpForm() {
+  const f = document.getElementById('cpPwForm');
+  f.style.display = f.style.display === 'none' || !f.style.display ? 'block' : 'none';
+}
+
+function changeCpanelPassword() {
+  const nw = document.getElementById('cp-new-pw').value.trim();
+  const cf = document.getElementById('cp-confirm-pw').value.trim();
+  const msg = document.getElementById('cpPwMsg');
+  msg.style.display = 'block';
+  if (nw.length < 8) { msg.style.color='#ef4444'; msg.textContent='❌ Min 8 characters'; return; }
+  if (nw !== cf) { msg.style.color='#ef4444'; msg.textContent='❌ Passwords do not match'; return; }
+  msg.style.color='#22d3ee'; msg.textContent='⏳ Updating...';
+  fetch('/dashboard/change-cpanel-password', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({password: nw})
+  }).then(r=>r.json()).then(d=>{
+    if (d.success) {
+      msg.style.color='#10b981'; msg.textContent='✅ cPanel password updated!';
+      const disp = document.getElementById('cp-pw-disp');
+      if (disp) disp.textContent = nw;
+      document.getElementById('cp-new-pw').value='';
+      document.getElementById('cp-confirm-pw').value='';
+    } else {
+      msg.style.color='#ef4444'; msg.textContent='❌ '+(d.error||'Failed');
+    }
+  }).catch(()=>{ msg.style.color='#ef4444'; msg.textContent='❌ Network error'; });
+}
+
+function togglePteroForm() {
+  const f = document.getElementById('pteroPwForm');
+  f.style.display = f.style.display === 'none' || !f.style.display ? 'block' : 'none';
+}
+
+function changePteroPassword() {
+  const nw = document.getElementById('ptero-new-pw').value.trim();
+  const cf = document.getElementById('ptero-confirm-pw').value.trim();
+  const msg = document.getElementById('pteroPwMsg');
+  msg.style.display = 'block';
+  if (nw.length < 8) { msg.style.color='#ef4444'; msg.textContent='❌ Min 8 characters'; return; }
+  if (nw !== cf) { msg.style.color='#ef4444'; msg.textContent='❌ Passwords do not match'; return; }
+  msg.style.color='#22d3ee'; msg.textContent='⏳ Updating...';
+  fetch('/dashboard/change-ptero-password', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({password: nw})
+  }).then(r => r.json()).then(d => {
+    if (d.success) {
+      msg.style.color='#10b981'; msg.textContent='✅ Panel password updated!';
+      document.getElementById('ptero-new-pw').value='';
+      document.getElementById('ptero-confirm-pw').value='';
+      // Update displayed password
+      const disp = document.getElementById('ptero-pw-display');
+      if (disp) disp.textContent = nw;
+    } else {
+      msg.style.color='#ef4444'; msg.textContent='❌ ' + (d.error||'Failed');
+    }
+  }).catch(() => { msg.style.color='#ef4444'; msg.textContent='❌ Network error'; });
+}
+
+function changePassword() {
+  const cur=document.getElementById('pw-current').value;
+  const nw=document.getElementById('pw-new').value;
+  const cf=document.getElementById('pw-confirm').value;
+  const err=document.getElementById('pwErr'); const ok=document.getElementById('pwOk');
+  err.style.display='none'; ok.style.display='none';
+  if(nw!==cf){err.textContent='❌ Passwords do not match';err.style.display='block';return;}
+  if(nw.length<6){err.textContent='❌ Min 6 characters';err.style.display='block';return;}
+  fetch('/dashboard/change-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({current:cur,new:nw})})
+  .then(r=>r.json()).then(d=>{
+    if(d.success){ok.style.display='block';document.getElementById('pw-current').value='';document.getElementById('pw-new').value='';document.getElementById('pw-confirm').value='';}
+    else{err.textContent='❌ '+d.error;err.style.display='block';}
+  });
+}
+
+function saveProfile() {
+  fetch('/dashboard/update-profile',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({fname:document.getElementById('p-fname').value,lname:document.getElementById('p-lname').value,email:document.getElementById('p-email').value})})
+  .then(r=>r.json()).then(d=>{
+    if(d.success){const ok=document.getElementById('profileOk');ok.style.display='block';setTimeout(()=>ok.style.display='none',3000);}
+  });
+}
+</script>
+{% endblock %}

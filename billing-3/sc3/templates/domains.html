@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Domains — StrengthCloud{% endblock %}
+{% block nd %}active{% endblock %}
+{% block head %}
+<style>
+.dom-hero{text-align:center;padding:64px 32px 48px;position:relative;overflow:hidden}
+.dblob1{position:absolute;width:500px;height:300px;background:radial-gradient(ellipse,rgba(6,182,212,0.08),transparent);top:0;left:50%;transform:translateX(-50%);filter:blur(60px);pointer-events:none}
+.dblob2{position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(139,92,246,0.06),transparent);bottom:-50px;left:10%;filter:blur(60px);pointer-events:none}
+.dblob3{position:absolute;width:250px;height:250px;background:radial-gradient(circle,rgba(16,185,129,0.05),transparent);top:10%;right:10%;filter:blur(60px);pointer-events:none}
+
+.search-wrap{max-width:600px;margin:0 auto 16px;position:relative}
+.search-box{display:flex;border-radius:14px;overflow:hidden;border:1px solid var(--border);background:var(--card);backdrop-filter:blur(20px);box-shadow:0 8px 40px rgba(0,0,0,0.3)}
+.search-box input{flex:1;background:none;border:none;padding:16px 22px;font-size:1rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;min-width:0}
+.search-box input::placeholder{color:var(--muted)}
+.search-box button{background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff;border:none;padding:14px 28px;font-family:'Orbitron',monospace;font-size:0.75rem;cursor:pointer;font-weight:700;letter-spacing:0.08em;transition:opacity .2s;flex-shrink:0}
+.search-box button:hover{opacity:.88}
+.search-note{font-size:0.76rem;color:var(--muted);text-align:center;margin-bottom:36px}
+.search-note a{color:var(--cy);font-weight:600}
+
+/* Login gate */
+.login-gate{display:inline-flex;align-items:center;gap:8px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:11px;padding:11px 18px;font-size:0.85rem;font-weight:600;color:#ef4444;margin-bottom:20px}
+
+/* Results */
+.results-wrap{max-width:720px;margin:0 auto;padding:0 32px}
+.results-title{font-size:0.8rem;color:var(--muted);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.dom-result{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;transition:all .22s;gap:12px}
+.dom-result.available{border-color:rgba(16,185,129,0.18)}
+.dom-result.available:hover{border-color:rgba(16,185,129,0.4);transform:translateX(4px)}
+.dom-result.taken{opacity:0.5}
+.dom-name{font-family:'Orbitron',monospace;font-size:0.95rem;font-weight:700}
+.dom-name .ext{color:var(--cy)}
+.dom-status{display:flex;align-items:center;gap:6px;font-size:0.76rem;font-weight:700}
+.s-avail{color:#10b981}
+.s-taken{color:#ef4444}
+.dom-price-wrap{display:flex;align-items:center;gap:10px}
+.dom-price{font-family:'Orbitron',monospace;font-weight:700;color:var(--cy);font-size:0.9rem;flex-shrink:0}
+.btn-dom-buy{padding:6px 14px;border-radius:7px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.25);color:var(--cy);font-size:0.76rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;font-family:'Syne',sans-serif}
+.btn-dom-buy:hover{background:linear-gradient(135deg,#06b6d4,#0891b2);border-color:transparent;color:#fff}
+
+.spinner{display:none;width:28px;height:28px;border:2px solid rgba(6,182,212,0.2);border-top-color:#06b6d4;border-radius:50%;animation:spin .7s linear infinite;margin:32px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Price table */
+.dom-table{max-width:680px;margin:0 auto;padding:0 32px 80px}
+.pt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:480px){.pt-grid{grid-template-columns:1fr}}
+.pt-row{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .22s}
+.pt-row:hover{border-color:rgba(6,182,212,0.3);transform:translateX(3px)}
+.pt-ext{font-family:'Orbitron',monospace;font-size:0.95rem;font-weight:700}
+.pt-price{font-family:'Orbitron',monospace;font-weight:700;font-size:0.88rem;color:var(--cy)}
+.pt-yr{font-family:'Syne',sans-serif;font-size:0.68rem;color:var(--muted);font-weight:400}
+</style>
+{% endblock %}
+{% block content %}
+<div class="dom-hero">
+  <div class="dblob1"></div>
+  <div class="dblob2"></div>
+  <div class="dblob3"></div>
+  <div class="section-label">Domains</div>
+  <div class="section-title" style="font-size:2.3rem">Find Your <span style="background:linear-gradient(135deg,#06b6d4,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Perfect Domain</span></div>
+  <p style="color:var(--muted2);margin:10px auto 24px;max-width:480px">Search availability across 20+ extensions in real time.</p>
+
+  {% if not user %}
+  <div class="login-gate">🔒 <span>Please <a href="/login" style="color:#ef4444;font-weight:700;text-decoration:underline">login</a> or <a href="/signup" style="color:#ef4444;font-weight:700;text-decoration:underline">sign up</a> to search domains</span></div>
+  {% endif %}
+
+  <div class="search-wrap">
+    <div class="search-box">
+      <input type="text" id="domInput" placeholder="Enter domain name (e.g. mycoolserver)..." {% if not user %}disabled style="opacity:0.5"{% endif %} maxlength="63">
+      <button onclick="searchDomain()" {% if not user %}disabled style="opacity:0.5;cursor:not-allowed"{% endif %}>🔍 SEARCH</button>
+    </div>
+  </div>
+  {% if user %}
+  <div class="search-note">Type a domain name and click Search — no dots or extensions needed.</div>
+  {% else %}
+  <div class="search-note"><a href="/login">Login</a> or <a href="/signup">Sign Up</a> (free) to search domain availability.</div>
+  {% endif %}
+</div>
+
+<div class="results-wrap">
+  <div class="spinner" id="spinner"></div>
+  <div id="resultsContainer"></div>
+</div>
+
+<div class="dom-table">
+  <div class="section-label" style="justify-content:flex-start;margin-bottom:16px">Pricing</div>
+  <div style="font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;margin-bottom:16px">All Extensions</div>
+  <div class="pt-grid">
+    {% for ext,price in [('.fun','499'),('.xyz','549'),('.in','799'),('.me','899'),('.online','849'),('.site','899'),('.info','749'),('.biz','699'),('.shop','1,199'),('.tech','1,099'),('.store','999'),('.host','1,299'),('.dev','1,899'),('.app','1,699'),('.co','1,799'),('.com','1,399'),('.org','1,499'),('.net','1,499'),('.io','2,499'),('.gg','2,999')] %}
+    <div class="pt-row" onclick="{% if user %}fillSearch('{{ ext[1:] }}'){% else %}window.location='/login'{% endif %}">
+      <span class="pt-ext">{{ ext }}</span>
+      <span class="pt-price">₹{{ price }}<span class="pt-yr">/yr</span></span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const domPrices={'.fun':499,'.xyz':549,'.in':799,'.online':849,'.site':899,'.shop':1199,'.host':1299,'.com':1399,'.org':1499,'.net':1499,'.io':2499,'.co':1799,'.dev':1899,'.app':1699,'.gg':2999,'.me':899,'.info':749,'.biz':699,'.store':999,'.tech':1099};
+let searchTimer=null;
+const loggedIn={{ 'true' if user else 'false' }};
+
+function fillSearch(val){
+  const inp=document.getElementById('domInput');
+  if(inp){inp.value=val;inp.focus();}
+}
+
+document.getElementById('domInput')?.addEventListener('keypress',e=>{if(e.key==='Enter')searchDomain();});
+document.getElementById('domInput')?.addEventListener('input',function(){
+  clearTimeout(searchTimer);
+  if(this.value.trim().length>=2){searchTimer=setTimeout(searchDomain,600);}
+});
+
+function searchDomain(){
+  if(!loggedIn){showToast('🔒 Please login to search domains','error');return;}
+  const q=document.getElementById('domInput').value.trim().replace(/\s+/g,'').replace(/\..*/,'');
+  if(!q||q.length<2){showToast('Enter at least 2 characters','error');return;}
+  document.getElementById('spinner').style.display='block';
+  document.getElementById('resultsContainer').innerHTML='';
+  fetch('/api/domain-search?q='+encodeURIComponent(q))
+  .then(r=>r.json())
+  .then(data=>{
+    document.getElementById('spinner').style.display='none';
+    if(data.error==='login_required'){showToast('🔒 Please login to search domains','error');return;}
+    if(data.error){showToast('Error: '+data.error,'error');return;}
+    renderResults(data.results,q);
+  })
+  .catch(()=>{document.getElementById('spinner').style.display='none';showToast('Search failed. Try again.','error');});
+}
+
+function renderResults(results,query){
+  const c=document.getElementById('resultsContainer');
+  const available=results.filter(r=>r.available);
+  const taken=results.filter(r=>!r.available);
+  let html=`<div class="results-title">✅ ${available.length} Available · ❌ ${taken.length} Taken</div>`;
+  results.forEach(r=>{
+    html+=`<div class="dom-result ${r.available?'available':'taken'}">
+      <div>
+        <div class="dom-name">${query}<span class="ext">${r.ext}</span></div>
+        <div class="dom-status">${r.available?'<span class="s-avail">✅ Available</span>':'<span class="s-taken">❌ Taken</span>'}</div>
+      </div>
+      <div class="dom-price-wrap">
+        <div class="dom-price">₹${r.price}<span style="font-family:'Syne',sans-serif;font-size:0.68rem;color:var(--muted);font-weight:400">/yr</span></div>
+        ${r.available?`<button class="btn-dom-buy" onclick="showToast('🌐 Domain checkout coming soon!')">Buy →</button>`:''}
+      </div>
+    </div>`;
+  });
+  c.innerHTML=html;
+}
+</script>
+{% endblock %}

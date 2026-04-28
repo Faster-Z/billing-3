@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Login — StrengthCloud{% endblock %}
+{% block head %}
+<style>
+.auth-wrap{min-height:calc(100vh - 68px);display:flex;align-items:center;justify-content:center;padding:40px 20px;position:relative}
+.auth-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 40%,rgba(139,92,246,0.06),transparent)}
+.auth-card{background:rgba(10,15,35,0.85);backdrop-filter:blur(32px);border:1px solid var(--border);border-radius:22px;padding:44px;width:100%;max-width:420px;position:relative;box-shadow:0 24px 80px rgba(0,0,0,0.5)}
+.auth-logo{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:8px}
+.auth-logo img{width:32px;height:32px;border-radius:50%}
+.auth-title{font-family:'Orbitron',monospace;font-size:1.5rem;font-weight:900;text-align:center;margin-bottom:6px}
+.auth-sub{text-align:center;color:var(--muted);font-size:0.875rem;margin-bottom:32px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:0.78rem;font-weight:800;margin-bottom:6px;color:var(--muted2);letter-spacing:0.08em;text-transform:uppercase}
+.form-group input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:10px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;transition:all .2s}
+.form-group input:focus{border-color:rgba(139,92,246,0.5);background:rgba(139,92,246,0.04);box-shadow:0 0 0 3px rgba(139,92,246,0.1)}
+.btn-full{width:100%;padding:13px;margin-top:6px;font-size:0.95rem;border-radius:11px;justify-content:center}
+.err-msg{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:9px;padding:10px 14px;color:#ef4444;font-size:0.85rem;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.auth-footer{text-align:center;color:var(--muted);font-size:0.85rem;margin-top:18px}
+.auth-footer a{color:var(--pu);font-weight:700}
+.divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--muted);font-size:0.78rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="https://cdn.discordapp.com/icons/1416472559104299210/6299f0c15609e8680791202bfa89df74.webp?size=64">
+      <div class="logo-text"><span class="t1">Strength</span><span class="t2">Cloud</span></div>
+    </div>
+    <div class="auth-title">Welcome <span class="grad-text">Back</span></div>
+    <div class="auth-sub">Sign in to your account</div>
+    {% if error %}<div class="err-msg">⚠️ {{ error }}</div>{% endif %}
+    <form method="POST">
+      <div class="form-group"><label>Username</label><input name="username" placeholder="your_username" required autofocus></div>
+      <div class="form-group"><label>Password</label><input type="password" name="password" placeholder="••••••••" required></div>
+      <button type="submit" class="btn btn-primary btn-full">Sign In →</button>
+    </form>
+    <div class="divider">or</div>
+    <a href="https://discord.gg/strengthcloud" target="_blank" class="btn btn-discord btn-full">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.111 18.1.12 18.12c2.053 1.508 4.041 2.423 5.993 3.029a.077.077 0 00.084-.028c.462-.63.874-1.295 1.226-1.994.076.076 0 00-.041-.106a13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028c1.961-.607 3.95-1.522 6.002-3.029a.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
+      Join via Discord
+    </a>
+    <div class="auth-footer">Don't have an account? <a href="/signup">Sign Up</a></div>
+    <div class="auth-footer" style="margin-top:8px"><a href="/admin/login" style="color:var(--muted);font-weight:400">Admin Login →</a></div>
+  </div>
+</div>
+{% endblock %}

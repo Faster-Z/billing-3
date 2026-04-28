@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Panel — StrengthCloud</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--pu:#8b5cf6;--cy:#06b6d4;--bg:#02040f;--bg2:#060915;--bg3:#0a0f1f;--card:rgba(10,15,35,0.92);--border:rgba(139,92,246,0.12);--bdr:rgba(255,255,255,0.06);--text:#f1f5f9;--muted:rgba(255,255,255,0.38);--muted2:rgba(255,255,255,0.65);--green:#10b981;--red:#ef4444;--amber:#f59e0b;--sw:224px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;display:flex;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 50% 60% at 15% 20%,rgba(139,92,246,0.04),transparent),radial-gradient(ellipse 40% 50% at 85% 80%,rgba(6,182,212,0.03),transparent);pointer-events:none;z-index:0}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(139,92,246,0.3);border-radius:99px}
+
+/* SIDEBAR */
+.sb{width:var(--sw);background:rgba(5,8,18,0.97);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:100}
+.sb::after{content:'';position:absolute;top:0;right:0;width:1px;height:100%;background:linear-gradient(180deg,transparent,rgba(139,92,246,0.25),transparent)}
+.sb-head{padding:18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.sb-logo img{width:30px;height:30px;border-radius:50%;box-shadow:0 0 10px rgba(139,92,246,0.4)}
+.sb-brand{font-family:'Orbitron',monospace;font-size:0.78rem;font-weight:900;line-height:1}
+.t2{background:linear-gradient(90deg,#8b5cf6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sb-badge{font-size:0.52rem;font-weight:800;letter-spacing:0.1em;background:linear-gradient(135deg,var(--pu),var(--cy));color:#fff;padding:2px 6px;border-radius:99px;display:inline-block;margin-top:2px}
+.sb-nav{flex:1;overflow-y:auto;padding:12px 8px}
+.sb-sec{font-size:0.58rem;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.16);padding:12px 8px 5px}
+.si{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:8px;cursor:pointer;font-size:0.83rem;font-weight:600;color:var(--muted2);transition:all .18s;margin-bottom:1px;position:relative}
+.si:hover{background:rgba(139,92,246,0.07);color:#fff}
+.si.active{background:rgba(139,92,246,0.11);color:var(--pu)}
+.si.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;background:linear-gradient(180deg,var(--pu),var(--cy));border-radius:0 99px 99px 0}
+.si-ic{font-size:0.95rem;width:19px;text-align:center}
+.si-cnt{margin-left:auto;background:rgba(239,68,68,0.14);color:#ef4444;font-size:0.58rem;font-weight:800;padding:2px 5px;border-radius:99px}
+.sb-foot{padding:12px 8px;border-top:1px solid var(--border)}
+.sb-user{display:flex;align-items:center;gap:8px;padding:8px 9px;border-radius:9px;background:rgba(255,255,255,0.025);border:1px solid var(--border);margin-bottom:5px}
+.su-av{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#8b5cf6,#06b6d4);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:0.7rem;font-weight:700;flex-shrink:0}
+.su-name{font-size:0.79rem;font-weight:700;line-height:1}
+.su-role{font-size:0.62rem;color:var(--pu);font-weight:600}
+
+/* MAIN */
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh;position:relative;z-index:1}
+.topbar{height:60px;background:rgba(5,8,18,0.92);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50}
+.tb-title{font-family:'Orbitron',monospace;font-size:0.92rem;font-weight:700}
+.tb-crumb{font-size:0.73rem;color:var(--muted);margin-top:1px}
+.tb-right{display:flex;align-items:center;gap:7px}
+.content{padding:24px;flex:1}
+.tab-pane{display:none}.tab-pane.active{display:block}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:8px;font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .18s;border:none}
+.btn-sm{padding:6px 12px;font-size:0.77rem;border-radius:7px}
+.btn-xs{padding:4px 9px;font-size:0.7rem;border-radius:6px}
+.btn-primary{background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;box-shadow:0 3px 14px rgba(139,92,246,0.28)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 22px rgba(139,92,246,0.42)}
+.btn-cyan{background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff}
+.btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--bdr)}
+.btn-ghost:hover{border-color:rgba(139,92,246,0.32);color:#fff}
+.btn-danger{background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.18)}
+.btn-purple{background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.3)}
+.btn-danger:hover{background:rgba(239,68,68,0.2)}
+.btn-success{background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.18)}
+.btn-success:hover{background:rgba(16,185,129,0.2)}
+.btn-amber{background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.18)}
+.btn-red{background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.18)}
+
+/* STAT CARDS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+@media(max-width:1200px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:18px;position:relative;overflow:hidden;transition:all .25s}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--acc,linear-gradient(90deg,#8b5cf6,#06b6d4))}
+.stat-card:hover{border-color:rgba(139,92,246,0.22);transform:translateY(-2px)}
+.sc-label{font-size:0.68rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.sc-val{font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:900;margin-bottom:3px}
+.sc-sub{font-size:0.72rem;color:var(--muted)}
+.sc-icon{position:absolute;top:14px;right:14px;font-size:1.5rem;opacity:0.28}
+
+/* PANELS */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:15px;overflow:hidden;margin-bottom:18px}
+.panel-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.panel-head h3{font-family:'Orbitron',monospace;font-size:0.82rem;font-weight:700;display:flex;align-items:center;gap:7px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 14px;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);font-weight:800}
+td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.025);font-size:0.855rem;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(139,92,246,0.025)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:0.78rem}
+
+/* FORM */
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:0.68rem;font-weight:800;margin-bottom:4px;color:var(--muted2);letter-spacing:0.1em;text-transform:uppercase}
+.fg input,.fg select,.fg textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:8px;padding:8px 12px;font-size:0.855rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;transition:all .18s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:rgba(139,92,246,0.45);box-shadow:0 0 0 2px rgba(139,92,246,0.07)}
+.fg select option{background:#0a0f1f}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* Plan editor */
+.plan-row{background:rgba(255,255,255,0.018);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:10px;transition:border-color .2s}
+.plan-row:hover{border-color:rgba(139,92,246,0.2)}
+.plan-row-head{display:grid;grid-template-columns:1.5fr 0.7fr 0.7fr 1fr 0.8fr 0.8fr 0.8fr;gap:8px;margin-bottom:10px}
+.plan-row-head input{background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;transition:border-color .18s;width:100%}
+.plan-row-head input:focus{border-color:rgba(139,92,246,0.4)}
+.plan-row-foot{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.toggle-wrap{display:flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:600;color:var(--muted2);cursor:pointer}
+.toggle-wrap input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:#8b5cf6}
+
+/* Emoji picker */
+.emoji-btn{width:70px;height:70px;border-radius:12px;border:2px dashed rgba(139,92,246,0.25);background:rgba(139,92,246,0.05);font-size:2.4rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .22s;position:relative;flex-shrink:0}
+.emoji-btn:hover{border-color:rgba(139,92,246,0.6);background:rgba(139,92,246,0.1);transform:scale(1.05)}
+.emoji-btn .e-hint{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:0.6rem;color:var(--muted);white-space:nowrap;font-family:'Syne',sans-serif}
+.emoji-modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
+.emoji-modal.open{display:flex}
+.emoji-box{background:#0a0f1f;border:1px solid rgba(139,92,246,0.2);border-radius:18px;padding:20px;width:90%;max-width:520px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,0.8)}
+.emoji-box-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-shrink:0}
+.emoji-box-head h4{font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:700}
+.emoji-search{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px 13px;font-size:0.855rem;color:#fff;font-family:'Syne',sans-serif;outline:none;width:100%;margin-bottom:12px;flex-shrink:0;transition:border-color .18s}
+.emoji-search:focus{border-color:rgba(139,92,246,0.5)}
+.emoji-cats{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;flex-shrink:0}
+.ecat{padding:4px 10px;border-radius:7px;font-size:0.72rem;font-weight:700;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);color:rgba(255,255,255,0.5);transition:all .18s}
+.ecat.active,.ecat:hover{background:rgba(139,92,246,0.15);border-color:rgba(139,92,246,0.35);color:#fff}
+.emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;overflow-y:auto;flex:1}
+.emoji-grid button{background:none;border:1px solid transparent;border-radius:8px;font-size:1.6rem;cursor:pointer;padding:6px;transition:all .15s;aspect-ratio:1;display:flex;align-items:center;justify-content:center}
+.emoji-grid button:hover{background:rgba(139,92,246,0.12);border-color:rgba(139,92,246,0.3);transform:scale(1.15)}
+
+/* Sale panel */
+.sale-preview{background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(245,158,11,0.06));border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:18px;text-align:center;margin-bottom:16px}
+.sale-preview .big{font-family:'Orbitron',monospace;font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,#ef4444,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+
+/* Badge */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:0.65rem;font-weight:800;letter-spacing:0.05em}
+.b-green{background:rgba(16,185,129,0.12);color:#10b981}
+.b-red{background:rgba(239,68,68,0.12);color:#ef4444}
+.b-amber{background:rgba(245,158,11,0.12);color:#f59e0b}
+.b-blue{background:rgba(99,102,241,0.12);color:#818cf8}
+.b-pu{background:rgba(139,92,246,0.12);color:#a78bfa}
+.b-cyan{background:rgba(6,182,212,0.12);color:#22d3ee}
+
+.search-input{background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:8px;padding:7px 13px;font-size:0.8rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;min-width:180px;transition:border-color .18s}
+.search-input:focus{border-color:rgba(139,92,246,0.38)}
+
+/* Toggle switch */
+.sw{position:relative;display:inline-block;width:44px;height:24px}
+.sw input{opacity:0;width:0;height:0}
+.sw-slider{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,0.08);border-radius:99px;transition:.3s;border:1px solid var(--bdr)}
+.sw-slider:before{position:absolute;content:'';height:16px;width:16px;left:3px;bottom:3px;background:rgba(255,255,255,0.4);border-radius:50%;transition:.3s}
+.sw input:checked+.sw-slider{background:linear-gradient(135deg,#10b981,#059669)}
+.sw input:checked+.sw-slider:before{transform:translateX(20px);background:#fff}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,rgba(139,92,246,0.96),rgba(6,182,212,0.92));backdrop-filter:blur(20px);color:#fff;padding:11px 20px;border-radius:11px;font-weight:700;font-size:0.855rem;z-index:9999;opacity:0;transform:translateY(14px);transition:all .28s;pointer-events:none;box-shadow:0 8px 32px rgba(139,92,246,0.38)}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.error{background:linear-gradient(135deg,rgba(239,68,68,0.96),rgba(220,38,38,0.92))}
+
+/* Confirm modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(6px)}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-54%);background:var(--bg3);border:1px solid var(--border);border-radius:16px;padding:28px;width:90%;max-width:440px;z-index:501;transition:transform .28s;box-shadow:0 30px 70px rgba(0,0,0,0.7)}
+.modal-overlay.open .modal{transform:translate(-50%,-50%)}
+.modal h3{font-family:'Orbitron',monospace;font-size:0.95rem;font-weight:700;margin-bottom:5px}
+.modal .sub{color:var(--muted);font-size:0.8rem;margin-bottom:18px}
+.modal-foot{display:flex;gap:7px;justify-content:flex-end;margin-top:18px}
+</style>
+</head>
+<body>
+
+<aside class="sb">
+  <div class="sb-head">
+    <div class="sb-logo"><img src="https://cdn.discordapp.com/icons/1416472559104299210/6299f0c15609e8680791202bfa89df74.webp?size=64" onerror="this.style.display='none'"></div>
+    <div><div class="sb-brand"><span style="color:#fff">Strength</span><span class="t2">Cloud</span></div><div class="sb-badge">ADMIN PANEL</div></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">Overview</div>
+    <div class="si active" onclick="goTab('dashboard',this)"><span class="si-ic">📊</span>Dashboard</div>
+    <div class="sb-sec">Minecraft</div>
+    <div class="si" onclick="goTab('mc-plans',this)"><span class="si-ic">⛏️</span>MC Plans</div>
+    <div class="sb-sec">VPS</div>
+    <div class="si" onclick="goTab('vps-plans',this)"><span class="si-ic">🖥️</span>VPS Plans</div>
+    <div class="sb-sec">Content</div>
+    <div class="si" onclick="goTab('features',this)"><span class="si-ic">⭐</span>Features</div>
+    <div class="si" onclick="goTab('faq',this)"><span class="si-ic">❓</span>FAQ</div>
+    <div class="si" onclick="goTab('testimonials',this)"><span class="si-ic">💬</span>Testimonials</div>
+    <div class="si" onclick="goTab('announcements',this)"><span class="si-ic">📢</span>Announcements</div>
+    <div class="sb-sec">Commerce</div>
+    <div class="si" onclick="goTab('sale',this)"><span class="si-ic">🔥</span>Sale Manager</div>
+    <div class="si" onclick="goTab('orders',this)"><span class="si-ic">📦</span>Orders<span class="si-cnt" id="pendingBadge">{{ stats.pending_orders }}</span></div>
+    <div class="si" onclick="goTab('coupons',this)"><span class="si-ic">🏷️</span>Coupons</div>
+    <div class="sb-sec">People</div>
+    <div class="si" onclick="goTab('users',this)"><span class="si-ic">👥</span>Users</div>
+    <div class="si" onclick="goTab('servers',this);loadPteroServers()"><span class="si-ic">🖥️</span>Server Manager</div>
+    <div class="sb-sec">Config</div>
+    <div class="si" onclick="goTab('stats',this)"><span class="si-ic">📈</span>Site Stats</div>
+    <div class="si" onclick="goTab('payment',this)"><span class="si-ic">💳</span>Payment Setup</div>
+    <div class="si" onclick="goTab('pterodactyl',this)"><span class="si-ic">🤖</span>Pterodactyl (MC)</div>
+    <div class="si" onclick="goTab('cpanel',this)"><span class="si-ic">🖥️</span>cPanel (VPS)</div>
+    <div class="si" onclick="goTab('discord',this)"><span class="si-ic">💬</span>Discord Bot</div>
+    <div class="si" onclick="goTab('settings',this)"><span class="si-ic">⚙️</span>Settings</div>
+  </nav>
+  <div class="sb-foot">
+    <div class="sb-user"><div class="su-av">A</div><div><div class="su-name">Admin</div><div class="su-role">Super Admin</div></div></div>
+    <a href="/home" target="_blank" class="si"><span class="si-ic">🌐</span>View Site ↗</a>
+    <a href="/admin/logout" class="si" style="color:#ef4444"><span class="si-ic">🚪</span>Logout</a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div><div class="tb-title" id="tbTitle">Dashboard</div><div class="tb-crumb" id="tbCrumb">Overview</div></div>
+    <div class="tb-right">
+      <span style="font-size:0.72rem;color:var(--muted);font-family:'JetBrains Mono',monospace">{{ data.site.name }}</span>
+      <button class="btn btn-primary btn-sm" onclick="saveAll()">💾 Save All</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── DASHBOARD ─── -->
+    <div id="pane-dashboard" class="tab-pane active">
+      <div class="stats-row">
+        <div class="stat-card" style="--acc:linear-gradient(90deg,#8b5cf6,#6d28d9)"><div class="sc-icon">📦</div><div class="sc-label">Total Orders</div><div class="sc-val" style="color:#a78bfa">{{ stats.total_orders }}</div><div class="sc-sub">{{ stats.pending_orders }} pending</div></div>
+        <div class="stat-card" style="--acc:linear-gradient(90deg,#10b981,#059669)"><div class="sc-icon">💰</div><div class="sc-label">Revenue</div><div class="sc-val" style="color:#10b981;font-size:1.5rem">₹{{ stats.revenue }}</div><div class="sc-sub">all orders</div></div>
+        <div class="stat-card" style="--acc:linear-gradient(90deg,#06b6d4,#0891b2)"><div class="sc-icon">👥</div><div class="sc-label">Users</div><div class="sc-val" style="color:#06b6d4">{{ stats.total_users }}</div><div class="sc-sub">{{ stats.active_users }} active</div></div>
+        <div class="stat-card" style="--acc:linear-gradient(90deg,#f59e0b,#d97706)"><div class="sc-icon">🖥️</div><div class="sc-label">Total Plans</div><div class="sc-val" style="color:#f59e0b">{{ stats.total_plans + stats.total_vps }}</div><div class="sc-sub">{{ stats.total_plans }} MC + {{ stats.total_vps }} VPS</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>📦 Recent Orders</h3></div>
+        <table><thead><tr><th>ID</th><th>User</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr></thead><tbody>
+        {% for o in data.orders[-5:]|reverse %}
+        <tr><td class="mono">#{{ o.id }}</td><td style="font-weight:700">{{ o.username }}</td><td>{{ o['items']|length }}</td><td style="font-family:'Orbitron',monospace;font-weight:700;color:#a78bfa">₹{{ o.final }}</td><td><span class="badge {% if o.status=='active' %}b-green{% elif o.status=='pending' %}b-amber{% else %}b-blue{% endif %}">{{ o.status.upper() }}</span></td><td style="color:var(--muted);font-size:0.75rem">{{ o.date }}</td></tr>
+        {% else %}<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">No orders yet</td></tr>{% endfor %}
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- ── MINECRAFT PLANS ─── -->
+    <div id="pane-mc-plans" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head"><h3>⛏️ Minecraft Plans</h3><button class="btn btn-primary btn-sm" onclick="addMcPlan()">+ Add Plan</button></div>
+        <div style="padding:16px" id="mcPlansContainer">
+        {% for p in data.plans %}
+        <div class="plan-row" data-id="{{ p.id }}">
+          <div class="plan-row-head">
+            <input value="{{ p.name }}" placeholder="Plan name" class="f-name" title="Name">
+            <input value="{{ p.ram }}" placeholder="4GB" class="f-ram" title="RAM">
+            <input value="{{ p.cpu }}" placeholder="100%" class="f-cpu" title="CPU">
+            <input value="{{ p.storage }}" placeholder="10GB NVMe" class="f-storage" title="Storage">
+            <input value="{{ p.price_monthly }}" type="number" class="f-mo" title="Monthly ₹">
+            <input value="{{ p.price_yearly }}" type="number" class="f-yr" title="Yearly ₹">
+            <input value="{{ p.price_lifetime }}" type="number" class="f-li" title="Lifetime ₹">
+          </div>
+          <div style="margin-bottom:10px">
+            <input value="{{ p.description }}" placeholder="Short description..." class="f-desc" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;width:100%">
+          </div>
+          <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+            <div style="flex:0 0 160px">
+              <div style="font-size:0.68rem;font-weight:800;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px">Plan Color</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input type="color" value="{{ p.color }}" class="f-color" style="width:36px;height:32px;border-radius:6px;border:1px solid var(--bdr);background:none;cursor:pointer;padding:2px">
+                <input value="{{ p.color }}" class="f-color-txt" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'JetBrains Mono',monospace;outline:none;width:100px">
+              </div>
+            </div>
+            <div>
+              <div style="font-size:0.68rem;font-weight:800;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Plan Emoji</div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="emoji-btn" onclick="openEmojiPicker(this)">
+                  <span class="e-val">{{ p.emoji if p.emoji else '⛏️' }}</span>
+                  <span class="e-hint">click to change</span>
+                </div>
+                <input type="hidden" class="f-emoji" value="{{ p.emoji if p.emoji else '⛏️' }}">
+                <span style="font-size:0.72rem;color:var(--muted)">This emoji<br>shows on<br>the website</span>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:22px">
+              <label class="toggle-wrap"><input type="checkbox" class="f-popular" {% if p.popular %}checked{% endif %}><span>⭐ Popular</span></label>
+              <label class="toggle-wrap"><input type="checkbox" class="f-soldout" {% if p.sold_out %}checked{% endif %}><span>⛔ Sold Out</span></label>
+            </div>
+            <div style="margin-top:22px;margin-left:auto">
+              <button class="btn btn-danger btn-xs" onclick="this.closest('.plan-row').remove();showToast('Plan removed')">🗑️ Remove</button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VPS PLANS ─── -->
+    <div id="pane-vps-plans" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head"><h3>🖥️ VPS Plans</h3><button class="btn btn-cyan btn-sm" onclick="addVpsPlan()">+ Add VPS Plan</button></div>
+        <div style="padding:16px" id="vpsPlansContainer">
+        {% for p in data.vps_plans %}
+        <div class="plan-row vps-plan-row" data-id="{{ p.id }}">
+          <div class="plan-row-head" style="grid-template-columns:1.4fr 0.7fr 0.6fr 1fr 1fr 0.8fr 0.8fr">
+            <input value="{{ p.name }}" placeholder="VPS Name" class="v-name" title="Name">
+            <input value="{{ p.cpu_cores }}" type="number" placeholder="4" class="v-cpu" title="CPU Cores">
+            <input value="{{ p.ram }}" placeholder="4GB" class="v-ram" title="RAM">
+            <input value="{{ p.storage }}" placeholder="80GB NVMe" class="v-storage" title="Storage">
+            <input value="{{ p.bandwidth }}" placeholder="4TB" class="v-bw" title="Bandwidth">
+            <input value="{{ p.price_monthly }}" type="number" class="v-mo" title="Monthly ₹">
+            <input value="{{ p.price_yearly }}" type="number" class="v-yr" title="Yearly ₹">
+          </div>
+          <div style="margin-bottom:10px">
+            <input value="{{ p.description }}" placeholder="Description..." class="v-desc" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;width:100%">
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:0.68rem;font-weight:800;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px">OS Options (comma-separated)</div>
+            <input value="{{ p.os|join(', ') }}" placeholder="Ubuntu 22.04, Debian 12, Windows Server 2022" class="v-os" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;width:100%">
+          </div>
+          <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+            <div style="flex:0 0 160px">
+              <div style="font-size:0.68rem;font-weight:800;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px">Plan Color</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input type="color" value="{{ p.color }}" class="v-color" style="width:36px;height:32px;border-radius:6px;border:1px solid var(--bdr);background:none;cursor:pointer;padding:2px">
+                <input value="{{ p.color }}" class="v-color-txt" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'JetBrains Mono',monospace;outline:none;width:100px">
+              </div>
+            </div>
+            <div>
+              <div style="font-size:0.68rem;font-weight:800;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Plan Emoji</div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="emoji-btn" onclick="openEmojiPicker(this)">
+                  <span class="e-val">{{ p.emoji if p.emoji else '🖥️' }}</span>
+                  <span class="e-hint">click to change</span>
+                </div>
+                <input type="hidden" class="v-emoji" value="{{ p.emoji if p.emoji else '🖥️' }}">
+                <span style="font-size:0.72rem;color:var(--muted)">This emoji<br>shows on<br>the website</span>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:22px">
+              <label class="toggle-wrap"><input type="checkbox" class="v-popular" {% if p.popular %}checked{% endif %}><span>⭐ Popular</span></label>
+              <label class="toggle-wrap"><input type="checkbox" class="v-soldout" {% if p.sold_out %}checked{% endif %}><span>⛔ Sold Out</span></label>
+            </div>
+            <div style="margin-top:22px;margin-left:auto">
+              <button class="btn btn-danger btn-xs" onclick="this.closest('.plan-row').remove();showToast('VPS plan removed')">🗑️ Remove</button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SALE MANAGER ─── -->
+    <div id="pane-sale" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head"><h3>🔥 Sale Manager</h3></div>
+        <div style="padding:24px;max-width:600px">
+          <div class="sale-preview" id="salePreviewBox" style="{% if not data.sale.active %}opacity:0.4{% endif %}">
+            <div class="big" id="salePreviewPct">{{ data.sale.percent }}%</div>
+            <div style="font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;color:#fff;margin-top:4px">OFF EVERYTHING</div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.6);margin-top:6px" id="salePreviewLabel">{{ data.sale.label }}</div>
+            <div style="font-size:0.78rem;color:rgba(255,255,255,0.4);margin-top:4px" id="salePreviewSub">{{ data.sale.subtitle }}</div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:14px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:10px">
+            <div>
+              <div style="font-weight:700;font-size:0.9rem">Sale Active</div>
+              <div style="font-size:0.75rem;color:var(--muted)">When enabled, the sale popup shows on every page visit</div>
+            </div>
+            <label class="sw" style="margin-left:auto;flex-shrink:0">
+              <input type="checkbox" id="sale-active" {% if data.sale.active %}checked{% endif %} onchange="updateSalePreview()">
+              <span class="sw-slider"></span>
+            </label>
+          </div>
+
+          <div class="form-row" style="margin-bottom:14px">
+            <div class="fg" style="margin:0"><label>Discount %</label><input type="number" id="sale-percent" value="{{ data.sale.percent }}" min="1" max="99" oninput="updateSalePreview()"></div>
+            <div class="fg" style="margin:0"><label>Label Text</label><input id="sale-label" value="{{ data.sale.label }}" placeholder="MEGA SALE" oninput="updateSalePreview()"></div>
+          </div>
+          <div class="fg"><label>Subtitle / Description</label><input id="sale-subtitle" value="{{ data.sale.subtitle }}" placeholder="Limited time offer!" oninput="updateSalePreview()"></div>
+          <div class="fg"><label>Expiry (optional, display only)</label><input id="sale-expires" value="{{ data.sale.expires }}" placeholder="Dec 31, 2025 at midnight"></div>
+          <button class="btn btn-primary" onclick="saveAll()">💾 Save Sale Settings</button>
+          <p style="font-size:0.75rem;color:var(--muted);margin-top:10px">💡 The sale popup appears each time a visitor opens the site. Prices shown on plan pages will reflect the discount automatically.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FEATURES ─── -->
+    <div id="pane-features" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head"><h3>⭐ Features</h3><button class="btn btn-primary btn-sm" onclick="addFeat()">+ Add</button></div>
+        <div style="padding:16px" id="featContainer">
+        {% for f in data.features %}
+        <div style="display:grid;grid-template-columns:52px 1fr 2.5fr 40px;gap:9px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03)">
+          <input value="{{ f.icon }}" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px;text-align:center;font-size:1.2rem;color:var(--text);outline:none" class="feat-icon">
+          <input value="{{ f.title }}" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.855rem;color:var(--text);font-family:'Syne',sans-serif;outline:none" class="feat-title">
+          <input value="{{ f.desc }}" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.855rem;color:var(--text);font-family:'Syne',sans-serif;outline:none" class="feat-desc">
+          <button class="btn btn-danger btn-xs" onclick="this.closest('div').remove()">✕</button>
+        </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FAQ ─── -->
+    <div id="pane-faq" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head"><h3>❓ FAQ</h3><button class="btn btn-primary btn-sm" onclick="addFaq()">+ Add FAQ</button></div>
+        <div style="padding:16px" id="faqContainer">
+        {% for f in data.faqs %}
+        <div style="display:grid;grid-template-columns:1fr 2fr 40px;gap:9px;align-items:start;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03)">
+          <input value="{{ f.q }}" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.855rem;color:var(--text);font-family:'Syne',sans-serif;outline:none" class="faq-q">
+          <textarea rows="2" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.855rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;resize:vertical" class="faq-a">{{ f.a }}</textarea>
+          <button class="btn btn-danger btn-xs" style="margin-top:2px" onclick="this.closest('div').remove()">✕</button>
+        </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TESTIMONIALS ─── -->
+    <div id="pane-testimonials" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head"><h3>💬 Testimonials</h3><button class="btn btn-primary btn-sm" onclick="addTest()">+ Add</button></div>
+        <div style="padding:16px" id="testContainer">
+        {% for t in data.testimonials %}
+        <div style="display:grid;grid-template-columns:0.8fr 0.8fr 0.5fr 2fr 40px;gap:9px;align-items:start;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03)">
+          <input value="{{ t.name }}" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none" class="t-name">
+          <input value="{{ t.role }}" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none" class="t-role">
+          <input value="{{ t.stars }}" type="number" min="1" max="5" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none" class="t-stars">
+          <textarea rows="2" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;resize:vertical" class="t-text">{{ t.text }}</textarea>
+          <button class="btn btn-danger btn-xs" style="margin-top:2px" onclick="this.closest('div').remove()">✕</button>
+        </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ANNOUNCEMENTS ─── -->
+    <div id="pane-announcements" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head"><h3>📢 Announcements</h3><button class="btn btn-primary btn-sm" onclick="addAnn()">+ Add</button></div>
+        <div style="padding:16px" id="annContainer">
+        {% for a in data.announcements %}
+        <div style="background:rgba(255,255,255,0.018);border:1px solid var(--bdr);border-radius:11px;padding:14px;margin-bottom:9px">
+          <div class="form-row" style="margin-bottom:10px">
+            <div class="fg" style="margin:0"><label>Title</label><input value="{{ a.title }}" class="a-title"></div>
+            <div class="fg" style="margin:0"><label>Type</label><select class="a-type"><option value="info" {% if a.type=='info' %}selected{% endif %}>Info</option><option value="warning" {% if a.type=='warning' %}selected{% endif %}>Warning</option><option value="success" {% if a.type=='success' %}selected{% endif %}>Success</option></select></div>
+          </div>
+          <div class="fg" style="margin-bottom:10px"><label>Message</label><input value="{{ a.message }}" class="a-msg"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:0.8rem;color:var(--muted2)"><input type="checkbox" class="a-active" {% if a.active %}checked{% endif %} style="width:auto"> Active</label>
+            <button class="btn btn-danger btn-xs" onclick="this.closest('div').closest('div').remove()">Remove</button>
+          </div>
+        </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ORDERS ─── -->
+    <div id="pane-orders" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>📦 Orders <span style="font-size:0.72rem;font-weight:600;color:var(--muted);font-family:'Syne',sans-serif">({{ data.orders|length }} total)</span></h3>
+          <input class="search-input" placeholder="🔍 Search username / order ID..." oninput="filterOrders(this.value)">
+        </div>
+        <!-- Pending alert bar -->
+        {% set pending_count = data.orders|selectattr('status','in',['pending','pending_verification'])|list|length %}
+        {% if pending_count > 0 %}
+        <div style="margin:0 16px 12px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <div style="font-size:0.82rem;font-weight:700;color:#f59e0b">⚠️ {{ pending_count }} order(s) pending verification — review and click ✅ Accept to activate + auto-provision</div>
+        </div>
+        {% endif %}
+        <div style="overflow-x:auto">
+        <table style="min-width:900px">
+          <thead><tr>
+            <th>Order ID</th><th>User</th><th>Plan(s)</th><th>Amount</th><th>Method</th><th>UTR / Ref</th><th>Status</th><th>Date</th><th style="min-width:180px">Actions</th>
+          </tr></thead>
+          <tbody id="ordersBody">
+          {% for o in data.orders|reverse %}
+          <tr id="orow-{{ o.id }}" data-search="{{ o.username }} {{ o.id }}" style="{% if o.status in ['pending','pending_verification'] %}background:rgba(245,158,11,0.03){% endif %}">
+            <td class="mono" style="font-weight:700">#{{ o.id % 100000 }}</td>
+            <td style="font-weight:800">{{ o.username }}</td>
+            <td>{% for i in o['items'] %}
+              <div style="font-size:0.73rem;background:rgba(139,92,246,0.08);border-radius:5px;padding:2px 6px;margin-bottom:2px;display:inline-block">
+                {{ i.plan.name if i.plan is mapping else i.get('name','?') }}
+              </div>
+            {% endfor %}</td>
+            <td style="font-family:'Orbitron',monospace;font-weight:800;color:#a78bfa;white-space:nowrap">₹{{ o.final }}</td>
+            <td>
+              {% set pm = o.payment_method or 'manual' %}
+              <span class="badge {% if pm=='razorpay' %}b-blue{% elif pm=='upi' %}b-pu{% elif pm=='bank' %}b-cyan{% else %}b-amber{% endif %}">
+                {{ pm|upper }}
+              </span>
+            </td>
+            <td class="mono" style="font-size:0.72rem;color:var(--muted2)">{{ o.utr_number or o.payment_id or '—' }}</td>
+            <td>
+              <span id="ostatus-{{ o.id }}" class="badge {% if o.status=='active' %}b-green{% elif o.status=='paid' %}b-blue{% elif o.status=='completed' %}b-cyan{% elif o.status in ['pending','pending_verification'] %}b-amber{% else %}b-red{% endif %}">
+                {{ o.status|upper|replace('_',' ') }}
+              </span>
+              {% if o.ptero_provisioned %}<div style="font-size:0.6rem;color:#10b981;margin-top:2px">🤖 Provisioned</div>{% endif %}
+            </td>
+            <td style="color:var(--muted);font-size:0.72rem;white-space:nowrap">{{ o.date }}</td>
+            <td>
+              <div style="display:flex;gap:5px;flex-wrap:wrap">
+                {% if o.status in ['pending','pending_verification'] %}
+                <button class="btn btn-sm" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;font-size:0.72rem;padding:5px 10px;border-radius:7px;cursor:pointer;font-weight:800" onclick="acceptOrder({{ o.id }},this)" title="Accept payment & auto-provision Pterodactyl server">
+                  ✅ Accept & Provision
+                </button>
+                <button class="btn btn-danger btn-xs" onclick="rejectOrder({{ o.id }},this)">✗ Reject</button>
+                {% elif o.status == 'active' and not o.ptero_provisioned %}
+                <button class="btn btn-sm" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border:none;font-size:0.72rem;padding:5px 10px;border-radius:7px;cursor:pointer;font-weight:800" onclick="provisionOnly({{ o.id }},this)" title="Manually trigger Pterodactyl provisioning">
+                  🤖 Provision Now
+                </button>
+                {% elif o.status == 'paid' and not o.ptero_provisioned %}
+                <button class="btn btn-sm" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border:none;font-size:0.72rem;padding:5px 10px;border-radius:7px;cursor:pointer;font-weight:800" onclick="provisionOnly({{ o.id }},this)">
+                  🤖 Provision Now
+                </button>
+                {% else %}
+                <span style="font-size:0.72rem;color:var(--muted)">{{ '🤖 Auto-provisioned' if o.ptero_provisioned else '—' }}</span>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% else %}<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px">No orders yet</td></tr>{% endfor %}
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <!-- Provision Result Modal -->
+      <div class="modal-overlay" id="provisionModal">
+        <div class="modal" style="max-width:500px">
+          <h3 id="provTitle">🤖 Provisioning Result</h3>
+          <div class="sub" id="provSub"></div>
+          <div id="provBody" style="margin:14px 0;font-size:0.82rem;line-height:1.7"></div>
+          <div class="modal-foot"><button class="btn btn-primary btn-sm" onclick="document.getElementById('provisionModal').classList.remove('open')">Close</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── COUPONS ─── -->
+    <div id="pane-coupons" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head"><h3>🏷️ Coupons</h3><button class="btn btn-primary btn-sm" onclick="addCoupon()">+ Add Coupon</button></div>
+        <div style="padding:16px" id="couponContainer">
+        {% for c in data.coupons %}
+        <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 80px 40px;gap:9px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03)">
+          <input value="{{ c.code }}" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.855rem;color:var(--text);font-family:'JetBrains Mono',monospace;outline:none;text-transform:uppercase" class="c-code">
+          <select class="c-type" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.855rem;color:var(--text);font-family:'Syne',sans-serif;outline:none"><option value="percent" {% if c.type=='percent' %}selected{% endif %}>Percent %</option><option value="flat" {% if c.type=='flat' %}selected{% endif %}>Flat ₹</option></select>
+          <input value="{{ c.discount }}" type="number" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.855rem;color:var(--text);font-family:'Syne',sans-serif;outline:none" class="c-disc">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.8rem;color:var(--muted2)"><input type="checkbox" class="c-active" {% if c.active %}checked{% endif %} style="width:auto"> Active</label>
+          <button class="btn btn-danger btn-xs" onclick="this.closest('div').remove()">✕</button>
+        </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── USERS ─── -->
+    <div id="pane-users" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head"><h3>👥 Users ({{ data.users|length }})</h3><input class="search-input" placeholder="🔍 Search..." oninput="filterUsers(this.value)"></div>
+        <table><thead><tr><th>Username</th><th>Email</th><th>Name</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="usersBody">
+        {% for u in data.users|reverse %}
+        <tr id="urow-{{ u.id }}" data-search="{{ u.username }} {{ u.email }}">
+          <td style="font-weight:800">{{ u.username }}{% if u.role == 'admin' %} <span style="font-size:0.65rem;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;padding:2px 6px;border-radius:5px;font-weight:900;letter-spacing:.05em">👑 ADMIN</span>{% endif %}</td>
+          <td class="mono" style="font-size:0.76rem">{{ u.email }}</td>
+          <td>{{ u.fname }} {{ u.lname }}</td>
+          <td style="color:var(--muted);font-size:0.76rem">{{ u.joined }}</td>
+          <td><span id="ustatus-{{ u.id }}" class="badge {% if u.active %}b-green{% else %}b-red{% endif %}">{% if u.active %}ACTIVE{% else %}SUSPENDED{% endif %}</span></td>
+          <td><div style="display:flex;gap:5px;flex-wrap:wrap">
+            <button class="btn btn-amber btn-xs" onclick="toggleUser({{ u.id }})">Toggle</button>
+            <button id="adminbtn-{{ u.id }}" class="btn btn-xs {% if u.role == 'admin' %}btn-danger{% else %}btn-purple{% endif %}" onclick="toggleAdmin({{ u.id }},'{{ u.username }}',this)">{% if u.role == 'admin' %}👑 Revoke Admin{% else %}👑 Make Admin{% endif %}</button>
+            <button class="btn btn-danger btn-xs" onclick="deleteUser({{ u.id }},'{{ u.username }}')">Delete</button>
+          </div></td>
+        </tr>
+        {% else %}<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:28px">No users</td></tr>{% endfor %}
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- ── SITE STATS ─── -->
+    <div id="pane-stats" class="tab-pane">
+      <div class="panel"><div class="panel-head"><h3>📈 Site Stats</h3></div>
+        <div style="padding:22px"><div class="form-row">
+          <div class="fg"><label>Active Servers</label><input id="s-servers" value="{{ data.stats.servers }}"></div>
+          <div class="fg"><label>Uptime</label><input id="s-uptime" value="{{ data.stats.uptime }}"></div>
+          <div class="fg"><label>Support</label><input id="s-support" value="{{ data.stats.support }}"></div>
+          <div class="fg"><label>Happy Gamers</label><input id="s-gamers" value="{{ data.stats.gamers }}"></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ── PAYMENT SETUP ─── -->
+    <div id="pane-payment" class="tab-pane">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:1000px">
+
+        <!-- Razorpay -->
+        <div class="panel">
+          <div class="panel-head">
+            <h3>⚡ Razorpay Gateway</h3>
+            <a href="https://dashboard.razorpay.com" target="_blank" class="btn btn-ghost btn-xs">Get API Keys ↗</a>
+          </div>
+          <div style="padding:22px">
+            <div style="background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.18);border-radius:10px;padding:12px;font-size:0.78rem;color:rgba(255,255,255,0.7);margin-bottom:16px;line-height:1.6">
+              💳 Enables <strong>Cards, UPI, NetBanking, Wallets, EMI</strong> — all in one. Get keys from Razorpay Dashboard → Settings → API Keys.
+            </div>
+            <div class="fg"><label>Key ID (starts with rzp_live_ or rzp_test_)</label><input id="pm-rz-key" value="{{ data.payment.razorpay_key_id }}" placeholder="rzp_live_xxxxxxxxxxxxxxxx"></div>
+            <div class="fg"><label>Key Secret (keep private!)</label><input type="password" id="pm-rz-secret" value="{{ data.payment.razorpay_key_secret }}" placeholder="••••••••••••••••••••"><span style="font-size:0.68rem;color:var(--muted)">⚠️ Never share this</span></div>
+            <div style="font-size:0.75rem;color:var(--muted);margin-top:6px">✅ Leave both empty to hide Razorpay on checkout. Use <code style="background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:4px">rzp_test_</code> keys for testing.</div>
+          </div>
+        </div>
+
+        <!-- UPI -->
+        <div class="panel">
+          <div class="panel-head"><h3>📱 UPI / QR Payment</h3></div>
+          <div style="padding:22px">
+            <div style="background:rgba(139,92,246,0.07);border:1px solid rgba(139,92,246,0.18);border-radius:10px;padding:12px;font-size:0.78rem;color:rgba(255,255,255,0.7);margin-bottom:16px;line-height:1.6">
+              📱 Customers pay via GPay / PhonePe / Paytm by scanning QR or copying your UPI ID. They enter UTR for manual verification.
+            </div>
+            <div class="fg"><label>UPI ID (e.g. yourname@upi)</label><input id="pm-upi-id" value="{{ data.payment.upi_id }}" placeholder="yourname@ybl"></div>
+            <div class="fg"><label>Display Name</label><input id="pm-upi-name" value="{{ data.payment.upi_name }}" placeholder="StrengthCloud Hosting"></div>
+            <div class="fg"><label>QR Code Image URL (optional)</label><input id="pm-upi-qr" value="{{ data.payment.upi_qr }}" placeholder="https://... (or upload to your server)"></div>
+            <div style="font-size:0.75rem;color:var(--muted)">✅ Leave UPI ID empty to hide UPI option on checkout.</div>
+          </div>
+        </div>
+
+        <!-- Bank Transfer -->
+        <div class="panel">
+          <div class="panel-head"><h3>🏦 Bank Transfer</h3></div>
+          <div style="padding:22px">
+            <div style="background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.18);border-radius:10px;padding:12px;font-size:0.78rem;color:rgba(255,255,255,0.7);margin-bottom:16px;line-height:1.6">
+              🏦 For NEFT / IMPS / RTGS transfers. Customers submit UTR number and orders are activated after manual verification.
+            </div>
+            <div class="fg"><label>Bank Name</label><input id="pm-bank-name" value="{{ data.payment.bank_name }}" placeholder="State Bank of India"></div>
+            <div class="fg"><label>Account Holder Name</label><input id="pm-bank-holder" value="{{ data.payment.bank_holder }}" placeholder="StrengthCloud Services"></div>
+            <div class="fg"><label>Account Number</label><input id="pm-bank-account" value="{{ data.payment.bank_account }}" placeholder="0000000000000" style="font-family:'JetBrains Mono',monospace"></div>
+            <div class="fg"><label>IFSC Code</label><input id="pm-bank-ifsc" value="{{ data.payment.bank_ifsc }}" placeholder="SBIN0000000" style="font-family:'JetBrains Mono',monospace"></div>
+            <div style="font-size:0.75rem;color:var(--muted)">✅ Leave Account Number empty to hide Bank Transfer on checkout.</div>
+          </div>
+        </div>
+
+        <!-- Save -->
+        <div class="panel" style="grid-column:1/-1">
+          <div style="padding:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <div style="font-size:0.82rem;color:var(--muted2)">💾 Payment settings are saved globally — click Save All.</div>
+            <button class="btn btn-primary" onclick="saveAll()">💾 Save Payment Settings</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── PTERODACTYL ─── -->
+    <div id="pane-pterodactyl" class="tab-pane">
+      <div style="max-width:900px">
+
+        <!-- Status Banner -->
+        <div style="padding:16px 20px;background:{% if data.pterodactyl.enabled %}rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.22){% else %}rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07){% endif %};border-radius:14px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-weight:800;font-size:0.92rem;margin-bottom:3px">🤖 Auto-Provisioning {% if data.pterodactyl.enabled %}<span style="color:#10b981">ENABLED</span>{% else %}<span style="color:var(--muted)">DISABLED</span>{% endif %}</div>
+            <div style="font-size:0.78rem;color:var(--muted2)">When enabled, servers are created on Pterodactyl automatically after payment — zero manual work.</div>
+          </div>
+          <label class="sw" style="flex-shrink:0">
+            <input type="checkbox" id="ptero-enabled" {% if data.pterodactyl.enabled %}checked{% endif %}>
+            <span class="sw-slider"></span>
+          </label>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+          <!-- Panel Connection -->
+          <div class="panel">
+            <div class="panel-head"><h3>🔌 Panel Connection</h3></div>
+            <div style="padding:22px">
+              <div class="fg"><label>Panel URL (no trailing slash)</label><input id="ptero-url" value="{{ data.pterodactyl.panel_url }}" placeholder="https://panel.yourhost.com"></div>
+              <div class="fg"><label>Application API Key</label>
+                <input type="password" id="ptero-key" value="{{ data.pterodactyl.api_key }}" placeholder="ptla_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                <span style="font-size:0.68rem;color:var(--muted)">Found in Panel → Admin → Application API → Create</span>
+              </div>
+              <button class="btn btn-cyan btn-sm" onclick="testPtero()" id="pteroTestBtn" style="margin-top:4px">🔍 Test Connection</button>
+              <div id="pteroTestResult" style="margin-top:10px;font-size:0.8rem;display:none"></div>
+            </div>
+          </div>
+
+          <!-- Server Defaults -->
+          <div class="panel">
+            <div class="panel-head"><h3>⚙️ Server Defaults</h3></div>
+            <div style="padding:22px">
+              <div class="form-row">
+                <div class="fg" style="margin:0 0 12px"><label>Location ID</label><input type="number" id="ptero-loc" value="{{ data.pterodactyl.location_id }}" min="1"></div>
+                <div class="fg" style="margin:0 0 12px"><label>Egg ID</label><input type="number" id="ptero-egg" value="{{ data.pterodactyl.egg_id }}" min="1"></div>
+              </div>
+              <div class="fg" style="margin:0 0 12px"><label>Docker Image</label><input id="ptero-docker" value="{{ data.pterodactyl.docker_image }}" placeholder="ghcr.io/pterodactyl/yolks:java_17"></div>
+              <div class="fg" style="margin:0"><label>Startup Command</label><input id="ptero-startup" value="{{ data.pterodactyl.startup }}" placeholder="java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}"></div>
+            </div>
+          </div>
+
+          <!-- Env Variables -->
+          <div class="panel">
+            <div class="panel-head"><h3>🔧 Default Environment Variables</h3></div>
+            <div style="padding:22px">
+              <div class="fg"><label>SERVER_JARFILE</label><input id="ptero-jarfile" value="{{ data.pterodactyl.default_variables.SERVER_JARFILE if data.pterodactyl.default_variables else 'server.jar' }}" placeholder="server.jar"></div>
+              <div class="fg"><label>MINECRAFT_VERSION</label><input id="ptero-mcver" value="{{ data.pterodactyl.default_variables.MINECRAFT_VERSION if data.pterodactyl.default_variables else 'latest' }}" placeholder="latest"></div>
+              <div class="fg"><label>BUILD_TYPE <span style="font-size:0.65rem;color:var(--muted)">(Paper/Purpur eggs)</span></label><input id="ptero-buildtype" value="{{ data.pterodactyl.default_variables.BUILD_TYPE if data.pterodactyl.default_variables else 'recommended' }}" placeholder="recommended"></div>
+              <div class="fg"><label>MC_VERSION <span style="font-size:0.65rem;color:var(--muted)">(some eggs use this)</span></label><input id="ptero-mcversion2" value="{{ data.pterodactyl.default_variables.MC_VERSION if data.pterodactyl.default_variables else 'latest' }}" placeholder="latest"></div>
+              <div style="font-size:0.72rem;color:var(--muted);margin-top:4px;line-height:1.6">
+                💡 These are sent to <strong>every</strong> provisioned server. The system also auto-fetches your egg's required variables from Pterodactyl and fills defaults automatically.
+              </div>
+            </div>
+          </div>
+
+          <!-- How it works -->
+          <div class="panel">
+            <div class="panel-head"><h3>📖 How It Works</h3></div>
+            <div style="padding:22px;font-size:0.82rem;color:var(--muted2);line-height:1.8">
+              <div>1️⃣ Customer pays via Razorpay / UPI / Bank</div>
+              <div>2️⃣ Payment confirmed → webhook or manual verify</div>
+              <div>3️⃣ <strong style="color:#10b981">System auto-creates</strong> Pterodactyl account for customer</div>
+              <div>4️⃣ <strong style="color:#10b981">Server provisioned</strong> with plan specs (RAM, CPU, disk)</div>
+              <div>5️⃣ Customer sees panel URL + credentials on order page</div>
+              <div>6️⃣ Server is live instantly ⚡</div>
+              <div style="margin-top:12px;padding:10px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;color:rgba(245,158,11,0.9)">
+                ⚠️ For manual UPI/Bank orders: Admin must set order status to <strong>Active</strong> after verifying payment — this triggers auto-provisioning.
+              </div>
+            </div>
+          </div>
+
+          <!-- Save -->
+          <div class="panel" style="grid-column:1/-1">
+            <div style="padding:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+              <div style="font-size:0.82rem;color:var(--muted2)">Remember to Test Connection before saving.</div>
+              <button class="btn btn-primary" onclick="saveAll()">💾 Save Pterodactyl Settings</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SERVER MANAGER ─── -->
+    <div id="pane-servers" class="tab-pane">
+      <div style="max-width:1100px">
+
+        <!-- Header bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">
+          <div>
+            <div style="font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:900">🖥️ Pterodactyl Server Manager</div>
+            <div style="font-size:0.78rem;color:var(--muted2);margin-top:3px">Live control of all servers on your panel</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input id="srvSearch" class="search-input" placeholder="🔍 Search server / user..." oninput="filterServers(this.value)" style="width:200px">
+            <button class="btn btn-primary btn-sm" onclick="loadPteroServers()">🔄 Refresh</button>
+            <a id="panelLink" href="#" target="_blank" class="btn btn-ghost btn-sm">🌐 Open Panel ↗</a>
+          </div>
+        </div>
+
+        <!-- Stats bar -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px" id="srvStats">
+          <div class="panel" style="padding:14px;text-align:center">
+            <div style="font-size:1.6rem;font-weight:900;font-family:'Orbitron',monospace;color:#a78bfa" id="srvTotal">—</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">Total Servers</div>
+          </div>
+          <div class="panel" style="padding:14px;text-align:center">
+            <div style="font-size:1.6rem;font-weight:900;font-family:'Orbitron',monospace;color:#10b981" id="srvRunning">—</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">Running</div>
+          </div>
+          <div class="panel" style="padding:14px;text-align:center">
+            <div style="font-size:1.6rem;font-weight:900;font-family:'Orbitron',monospace;color:#ef4444" id="srvSuspended">—</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">Suspended</div>
+          </div>
+          <div class="panel" style="padding:14px;text-align:center">
+            <div style="font-size:1.6rem;font-weight:900;font-family:'Orbitron',monospace;color:#f59e0b" id="srvUsers">—</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">Panel Users</div>
+          </div>
+        </div>
+
+        <!-- Server list -->
+        <div class="panel" id="srvPanel">
+          <div id="srvLoading" style="text-align:center;padding:48px;color:var(--muted2)">
+            <div style="font-size:2.5rem;margin-bottom:12px">🤖</div>
+            <div style="font-weight:700;margin-bottom:6px">Click Refresh to load servers</div>
+            <div style="font-size:0.78rem">Fetches live data from your Pterodactyl panel</div>
+          </div>
+          <div style="overflow-x:auto;display:none" id="srvTableWrap">
+            <table style="min-width:900px" id="srvTable">
+              <thead><tr>
+                <th>Server</th><th>User</th><th>RAM</th><th>CPU</th><th>Disk</th><th>Node</th><th>Status</th><th style="min-width:220px">Actions</th>
+              </tr></thead>
+              <tbody id="srvBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit RAM Modal -->
+      <div class="modal-overlay" id="editRamModal">
+        <div class="modal" style="max-width:420px">
+          <h3>⚙️ Edit Server Resources</h3>
+          <div class="sub" id="editRamSub">Update limits for this server</div>
+          <input type="hidden" id="editSrvId">
+          <div style="padding:16px 0">
+            <div class="fg" style="margin-bottom:12px">
+              <label>RAM (MB) — current: <span id="curRam" style="color:#a78bfa;font-family:'JetBrains Mono',monospace"></span></label>
+              <input type="number" id="newRam" min="128" step="256" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 13px;color:#fff;width:100%;outline:none;font-family:'JetBrains Mono',monospace;font-size:0.9rem">
+              <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap">
+                <button class="btn btn-ghost btn-xs" onclick="document.getElementById('newRam').value=512">512MB</button>
+                <button class="btn btn-ghost btn-xs" onclick="document.getElementById('newRam').value=1024">1GB</button>
+                <button class="btn btn-ghost btn-xs" onclick="document.getElementById('newRam').value=2048">2GB</button>
+                <button class="btn btn-ghost btn-xs" onclick="document.getElementById('newRam').value=4096">4GB</button>
+                <button class="btn btn-ghost btn-xs" onclick="document.getElementById('newRam').value=6144">6GB</button>
+                <button class="btn btn-ghost btn-xs" onclick="document.getElementById('newRam').value=8192">8GB</button>
+                <button class="btn btn-ghost btn-xs" onclick="document.getElementById('newRam').value=12288">12GB</button>
+                <button class="btn btn-ghost btn-xs" onclick="document.getElementById('newRam').value=16384">16GB</button>
+              </div>
+            </div>
+            <div class="fg" style="margin-bottom:12px">
+              <label>CPU Limit (%) — current: <span id="curCpu" style="color:#a78bfa;font-family:'JetBrains Mono',monospace"></span></label>
+              <input type="number" id="newCpu" min="0" step="50" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 13px;color:#fff;width:100%;outline:none;font-family:'JetBrains Mono',monospace;font-size:0.9rem">
+              <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap">
+                <button class="btn btn-ghost btn-xs" onclick="document.getElementById('newCpu').value=0">Unlimited</button>
+                <button class="btn btn-ghost btn-xs" onclick="document.getElementById('newCpu').value=100">100%</button>
+                <button class="btn btn-ghost btn-xs" onclick="document.getElementById('newCpu').value=200">200%</button>
+                <button class="btn btn-ghost btn-xs" onclick="document.getElementById('newCpu').value=300">300%</button>
+                <button class="btn btn-ghost btn-xs" onclick="document.getElementById('newCpu').value=400">400%</button>
+              </div>
+            </div>
+            <div class="fg" style="margin:0">
+              <label>Disk (MB) — current: <span id="curDisk" style="color:#a78bfa;font-family:'JetBrains Mono',monospace"></span></label>
+              <input type="number" id="newDisk" min="1024" step="1024" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 13px;color:#fff;width:100%;outline:none;font-family:'JetBrains Mono',monospace;font-size:0.9rem">
+            </div>
+          </div>
+          <div id="editRamMsg" style="font-size:0.8rem;font-weight:700;margin-bottom:10px;display:none"></div>
+          <div class="modal-foot">
+            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('editRamModal').classList.remove('open')">Cancel</button>
+            <button class="btn btn-primary btn-sm" onclick="saveServerResources()">💾 Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CPANEL ─── -->
+    <div id="pane-cpanel" class="tab-pane">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:1100px">
+
+        <!-- Connection -->
+        <div class="panel">
+          <div class="panel-head"><h3>🖥️ WHM / cPanel Connection</h3></div>
+          <div style="padding:22px">
+            <div style="background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.2);border-radius:10px;padding:12px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-size:0.82rem;font-weight:800;color:#22d3ee">🖥️ VPS Auto-Provisioning</div>
+                <div style="font-size:0.7rem;color:var(--muted2);margin-top:2px">Creates cPanel accounts automatically on order accept</div>
+              </div>
+              <label class="sw"><input type="checkbox" id="cp-enabled" {% if data.cpanel.enabled %}checked{% endif %}><span class="sw-slider"></span></label>
+            </div>
+            <div class="fg"><label>WHM URL (e.g. https://yourserver.com)</label><input id="cp-whm-url" value="{{ data.cpanel.whm_url or '' }}" placeholder="https://yourserver.com or https://IP"></div>
+            <div class="fg"><label>WHM API Token <span style="font-size:0.65rem;color:var(--muted)">(WHM → API Tokens → Create)</span></label><input type="password" id="cp-api-token" value="{{ data.cpanel.api_token or '' }}" placeholder="WHM API Token"></div>
+            <div class="fg"><label>Server IP Address</label><input id="cp-ip" value="{{ data.cpanel.ip_address or '' }}" placeholder="e.g. 192.168.1.1"></div>
+            <button class="btn btn-sm" style="background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff;border:none;cursor:pointer;border-radius:9px;padding:9px 16px;font-weight:800;margin-bottom:10px" onclick="testCpanel()">🔌 Test Connection</button>
+            <div id="cpTestResult" style="font-size:0.8rem;font-weight:700;display:none;margin-top:6px"></div>
+          </div>
+        </div>
+
+        <!-- Account Defaults -->
+        <div class="panel">
+          <div class="panel-head"><h3>⚙️ Account Defaults</h3></div>
+          <div style="padding:22px">
+            <div class="fg"><label>Default Package/Plan Name <span style="font-size:0.65rem;color:var(--muted)">(must exist in WHM)</span></label><input id="cp-package" value="{{ data.cpanel.default_package or 'default' }}" placeholder="default"></div>
+            <div class="fg"><label>Nameserver 1</label><input id="cp-ns1" value="{{ data.cpanel.nameserver1 or '' }}" placeholder="ns1.yourhost.com"></div>
+            <div class="fg"><label>Nameserver 2</label><input id="cp-ns2" value="{{ data.cpanel.nameserver2 or '' }}" placeholder="ns2.yourhost.com"></div>
+            <div style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:9px;padding:11px;font-size:0.75rem;color:rgba(255,255,255,0.65);line-height:1.6;margin-top:8px">
+              💡 <strong>How it works:</strong> When you click <em>Accept & Provision</em> on a VPS order, the system auto-creates a cPanel account with a random username and password, then shows the client their login details.
+            </div>
+          </div>
+        </div>
+
+        <!-- cPanel Accounts Manager -->
+        <div class="panel" style="grid-column:1/-1">
+          <div class="panel-head">
+            <h3>📋 cPanel Accounts</h3>
+            <div style="display:flex;gap:8px">
+              <input class="search-input" placeholder="🔍 Search..." oninput="filterCpAccounts(this.value)" style="width:180px">
+              <button class="btn btn-primary btn-sm" onclick="loadCpAccounts()">🔄 Refresh</button>
+              <a id="whmLink" href="{{ data.cpanel.whm_url or '#' }}" target="_blank" class="btn btn-ghost btn-sm">⚙️ Open WHM ↗</a>
+            </div>
+          </div>
+          <div id="cpLoading" style="text-align:center;padding:36px;color:var(--muted2)">
+            <div style="font-size:2rem;margin-bottom:8px">🖥️</div>
+            <div style="font-weight:700;margin-bottom:4px">Click Refresh to load cPanel accounts</div>
+            <div style="font-size:0.76rem">Live data from your WHM panel</div>
+          </div>
+          <div style="overflow-x:auto;display:none" id="cpTableWrap">
+            <table style="min-width:700px" id="cpTable">
+              <thead><tr><th>Username</th><th>Domain</th><th>Disk Used</th><th>Status</th><th style="min-width:160px">Actions</th></tr></thead>
+              <tbody id="cpBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div><!-- /pane-cpanel -->
+
+    <!-- ── DISCORD BOT ── -->
+    <div id="pane-discord" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head"><h3>💬 Discord Bot — Order Notifications</h3></div>
+        <div style="padding:24px">
+
+          <!-- How it works -->
+          <div style="background:rgba(88,101,242,0.08);border:1px solid rgba(88,101,242,0.25);border-radius:14px;padding:18px 20px;margin-bottom:24px">
+            <div style="font-weight:800;font-size:0.9rem;margin-bottom:10px;color:#7289da">💬 How Order Notifications Work</div>
+            <div style="font-size:0.82rem;color:var(--muted2);line-height:1.8">
+              <div>1️⃣ Create a Discord bot at <a href="https://discord.com/developers/applications" target="_blank" style="color:#7289da">discord.com/developers</a></div>
+              <div>2️⃣ Copy the <strong>Bot Token</strong> and paste below</div>
+              <div>3️⃣ Create a <strong>Webhook</strong> in any Discord channel → Copy URL → paste below</div>
+              <div>4️⃣ Get your <strong>Discord User ID</strong> (Enable Developer Mode → right-click yourself → Copy ID)</div>
+              <div>5️⃣ Run <code style="background:rgba(255,255,255,0.08);padding:2px 7px;border-radius:5px">python bot.py</code> on your server</div>
+              <div style="margin-top:8px;color:#10b981">✅ <strong>Webhook</strong> works instantly without running the bot — recommended for quick setup!</div>
+            </div>
+          </div>
+
+          <!-- Webhook (instant, no bot needed) -->
+          <div style="margin-bottom:22px">
+            <div style="font-size:0.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">⚡ Discord Webhook URL (Instant — Recommended)</div>
+            <input id="dc-webhook" type="text" class="form-control" placeholder="https://discord.com/api/webhooks/..." value="{{ data.discord.webhook_url or '' }}" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem">
+            <div style="font-size:0.7rem;color:var(--muted);margin-top:4px">Channel → Edit → Integrations → Webhooks → New Webhook → Copy URL</div>
+          </div>
+
+          <!-- Bot Token -->
+          <div style="margin-bottom:22px">
+            <div style="font-size:0.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">🤖 Bot Token</div>
+            <input id="dc-token" type="password" class="form-control" placeholder="Bot token from Discord Developer Portal" value="{{ data.discord.bot_token or '' }}" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem">
+            <div style="font-size:0.7rem;color:var(--muted);margin-top:4px">Discord Developer Portal → Your App → Bot → Reset Token</div>
+          </div>
+
+          <!-- Bot Secret -->
+          <div style="margin-bottom:22px">
+            <div style="font-size:0.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">🔐 Bot Secret Key (for button actions)</div>
+            <input id="dc-secret" type="password" class="form-control" placeholder="Make up any random password e.g. MySuperSecret123!" value="{{ data.discord.bot_secret or '' }}" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem">
+            <div style="font-size:0.7rem;color:var(--muted);margin-top:4px">Used by bot.py to authenticate order actions — set anything strong</div>
+          </div>
+
+          <!-- Site URL -->
+          <div style="margin-bottom:22px">
+            <div style="font-size:0.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">🌐 Your Site URL</div>
+            <input id="dc-siteurl" type="text" class="form-control" placeholder="https://strengthcloud.xyz" value="{{ data.discord.site_url or 'http://localhost:5000' }}">
+            <div style="font-size:0.7rem;color:var(--muted);margin-top:4px">Bot uses this to call your site API when you click buttons in Discord</div>
+          </div>
+
+          <!-- Owner ID -->
+          <div style="margin-bottom:22px">
+            <div style="font-size:0.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px">👤 Your Discord User ID (for DMs)</div>
+            <input id="dc-ownerid" type="text" class="form-control" placeholder="e.g. 123456789012345678" value="{{ data.discord.owner_id or '' }}" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem">
+            <div style="font-size:0.7rem;color:var(--muted);margin-top:4px">Settings → Advanced → Developer Mode ON → Right-click your name → Copy User ID</div>
+          </div>
+
+          <!-- Notify toggles -->
+          <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem;font-weight:600">
+              <input type="checkbox" id="dc-notify-orders" {% if data.discord.notify_orders %}checked{% endif %} style="width:16px;height:16px;accent-color:#8b5cf6">
+              Notify on every new order
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.85rem;font-weight:600">
+              <input type="checkbox" id="dc-notify-prov" {% if data.discord.notify_provisions %}checked{% endif %} style="width:16px;height:16px;accent-color:#8b5cf6">
+              Notify on auto-provision
+            </label>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="saveDiscord()">💾 Save Discord Settings</button>
+            <button class="btn btn-ghost" onclick="testWebhook()">🧪 Test Webhook</button>
+          </div>
+          <div id="dc-status" style="margin-top:12px;font-size:0.82rem"></div>
+
+          <!-- Bot.py instructions -->
+          <div style="margin-top:28px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:18px 20px">
+            <div style="font-weight:800;font-size:0.85rem;margin-bottom:12px">🖥️ Running the Bot (for DM mode)</div>
+            <div style="font-size:0.78rem;color:var(--muted2);line-height:2">
+              <div>1. Install: <code style="background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:5px">pip install discord.py requests</code></div>
+              <div>2. Run: <code style="background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:5px">python bot.py</code> (in same folder as app.py)</div>
+              <div>3. Keep it running alongside Flask (use <code style="background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:5px">screen</code> or <code style="background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:5px">pm2</code>)</div>
+              <div style="margin-top:6px;color:#f59e0b">⚡ <strong>Tip:</strong> Webhook mode works without running bot.py — just paste the webhook URL above and save.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div><!-- /pane-discord -->
+
+    <!-- ── SETTINGS ─── -->
+    <div id="pane-settings" class="tab-pane">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <div class="panel"><div class="panel-head"><h3>🌐 Site Settings</h3></div>
+          <div style="padding:22px">
+            <div class="fg"><label>Site Name</label><input id="cfg-name" value="{{ data.site.name }}"></div>
+            <div class="fg"><label>Discord URL</label><input id="cfg-discord" value="{{ data.site.discord }}"></div>
+            <div class="fg"><label>Tagline</label><input id="cfg-tagline" value="{{ data.site.tagline }}"></div>
+          </div>
+        </div>
+        <div class="panel"><div class="panel-head"><h3>🔐 Admin Credentials</h3></div>
+          <div style="padding:22px">
+            <div class="fg"><label>Username</label><input id="cfg-auser" value="{{ data.admin.username }}"></div>
+            <div class="fg"><label>New Password (leave blank to keep)</label><input type="password" id="cfg-apw" placeholder="New password"></div>
+            <button class="btn btn-primary" onclick="saveAll()">Update</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- EMOJI PICKER MODAL -->
+<div class="emoji-modal" id="emojiModal">
+  <div class="emoji-box">
+    <div class="emoji-box-head">
+      <h4>🎨 Pick an Emoji</h4>
+      <button onclick="closeEmojiPicker()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:1.2rem;cursor:pointer">✕</button>
+    </div>
+    <input class="emoji-search" placeholder="🔍  Search emoji..." oninput="filterEmoji(this.value)" id="emojiSearchInput">
+    <div class="emoji-cats" id="emojiCats"></div>
+    <div class="emoji-grid" id="emojiGrid"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3 id="modalTitle">Confirm</h3><div class="sub" id="modalSub">Are you sure?</div>
+    <div class="modal-foot"><button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-danger btn-sm" id="modalConfirm">Confirm</button></div>
+  </div>
+</div>
+
+<script>
+// ── EMOJI DATA ──────────────────────────────────────────────
+const EMOJI_CATS = {
+  'Minecraft': ['⛏️','🪨','🌲','⚔️','🏹','🎯','🗡️','🛡️','🏰','🌍','🔥','💧','⭐','🌙','☀️','❄️','🌊','⚡','🎮','🕹️','🎲','🏆','💎','🪙','📦','🗝️','🔑','🧱','🪵','🍎','🌽','🐷','🐄','🐔','🐑','🐺','🕷️','🦅','🐉','🧟','🧙‍♂️','🧝','🧞','👾','🤖'],
+  'Server': ['🖥️','💻','🖱️','⌨️','🖨️','📡','🔌','💾','💿','📀','🔋','📱','☁️','🌐','🔒','🔓','🛡️','⚙️','🔧','🔩','🪛','🔨','⚡','📊','📈','📉','🗄️','🧠','💡','🔬','🧪','🔭','📡','🛰️','🚀'],
+  'Gaming': ['🎮','🕹️','🎯','🏆','🥇','🥈','🥉','🎖️','🏅','👑','⚔️','🗡️','🛡️','🏹','🪃','💣','💥','🎰','🃏','🎲','🎴','♟️','🎳','🎱','🎰','🕹️','👾','🤖','👻','💀','☠️','🦾','🦿'],
+  'Nature': ['🌍','🌎','🌏','🌲','🌳','🌴','🌵','🌾','🍀','🌿','🌱','🌸','🌺','🌻','🌹','💐','🍄','🌊','🏔️','🗻','🌋','⛰️','🏞️','🌅','🌄','🌈','❄️','☄️','⭐','🌙','☀️','🌤️','⛈️','🌪️'],
+  'Tech': ['💻','🖥️','📱','⌚','📷','🎥','📡','🛰️','🚀','✈️','🚂','⚡','🔋','💡','🔬','🔭','🧬','🤖','🦾','🧪','🔬','💉','🏥','🏦','🏗️','🏢','🌉','🗼','🗽','🏛️','🎡','🎢','🎪'],
+  'Fire & Energy': ['🔥','⚡','💥','✨','🌟','⭐','💫','🌠','☄️','💧','🌊','🌀','❄️','🧊','🌈','🎆','🎇','🌙','☀️','🌤️','⚡','🔆','💡','🕯️','🪔','🔦','🏮','🌡️'],
+  'Symbols': ['💎','💰','🪙','💵','💴','💶','💷','🏦','📈','📉','📊','⚖️','🎯','🏆','🥇','👑','🔱','⚜️','🎪','🎭','🎨','🎬','🎤','🎵','🎶','🎸','🥁','🎹','🎺','🎻','🪕'],
+  'Fantasy': ['🐉','🦄','🧙‍♂️','🧝','🧞','🧟','👿','😈','💀','☠️','👻','🤡','🎭','🃏','🌑','🌕','⚗️','🔮','🪄','🧿','🪬','🗿','🏺','⚔️','🛡️','🪖','🗡️','🏹','🧲','🧪']
+};
+
+let activeEmojiTarget = null;
+let activeEmojiHidden = null;
+let allEmojis = [];
+let currentCat = 'Minecraft';
+
+// Build flat list
+Object.entries(EMOJI_CATS).forEach(([cat, emojis]) => {
+  emojis.forEach(e => { if (!allEmojis.includes(e)) allEmojis.push(e); });
+});
+
+function buildEmojiCats() {
+  const c = document.getElementById('emojiCats');
+  c.innerHTML = Object.keys(EMOJI_CATS).map(cat =>
+    `<div class="ecat ${cat===currentCat?'active':''}" onclick="showEmojiCat('${cat}',this)">${cat}</div>`
+  ).join('');
+}
+
+function showEmojiCat(cat, el) {
+  currentCat = cat;
+  document.querySelectorAll('.ecat').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderEmojis(EMOJI_CATS[cat]);
+  document.getElementById('emojiSearchInput').value = '';
+}
+
+function renderEmojis(emojis) {
+  const g = document.getElementById('emojiGrid');
+  g.innerHTML = emojis.map(e =>
+    `<button title="${e}" onclick="selectEmoji('${e}')">${e}</button>`
+  ).join('');
+}
+
+function filterEmoji(q) {
+  if (!q.trim()) { renderEmojis(EMOJI_CATS[currentCat]); return; }
+  // Search across all
+  const filtered = allEmojis; // show all when searching (emoji names not available, show all)
+  renderEmojis(EMOJI_CATS[currentCat]); // fallback: show current cat
+}
+
+function openEmojiPicker(btn) {
+  activeEmojiTarget = btn.querySelector('.e-val');
+  // find associated hidden input
+  const row = btn.closest('[class*="plan-row"]') || btn.closest('div');
+  activeEmojiHidden = btn.nextElementSibling; // the hidden input right after
+  document.getElementById('emojiModal').classList.add('open');
+  document.getElementById('emojiSearchInput').value = '';
+  buildEmojiCats();
+  renderEmojis(EMOJI_CATS[currentCat]);
+}
+
+function selectEmoji(e) {
+  if (activeEmojiTarget) activeEmojiTarget.textContent = e;
+  if (activeEmojiHidden) activeEmojiHidden.value = e;
+  closeEmojiPicker();
+  showToast('Emoji set to ' + e);
+}
+
+function closeEmojiPicker() {
+  document.getElementById('emojiModal').classList.remove('open');
+  activeEmojiTarget = null;
+  activeEmojiHidden = null;
+}
+
+// ── TABS ──────────────────────────────────────────────────────
+const titles={dashboard:'Dashboard','mc-plans':'Minecraft Plans','vps-plans':'VPS Plans',features:'Features',faq:'FAQ',testimonials:'Testimonials',announcements:'Announcements',sale:'Sale Manager',orders:'Orders',coupons:'Coupons',users:'Users',servers:'Server Manager',stats:'Site Stats',payment:'Payment Setup',pterodactyl:'Pterodactyl (MC)',cpanel:'cPanel (VPS)',discord:'Discord Bot',settings:'Settings'};
+
+function saveDiscord() {
+  const payload = {
+    discord: {
+      webhook_url:       document.getElementById('dc-webhook').value.trim(),
+      bot_token:         document.getElementById('dc-token').value.trim(),
+      bot_secret:        document.getElementById('dc-secret').value.trim(),
+      site_url:          document.getElementById('dc-siteurl').value.trim(),
+      owner_id:          document.getElementById('dc-ownerid').value.trim(),
+      notify_orders:     document.getElementById('dc-notify-orders').checked,
+      notify_provisions: document.getElementById('dc-notify-prov').checked,
+    }
+  };
+  fetch('/admin/save', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+  .then(r=>r.json()).then(d=>{
+    const s=document.getElementById('dc-status');
+    if(d.success){s.innerHTML='<span style="color:#10b981">✅ Saved!</span>';}
+    else{s.innerHTML=`<span style="color:#ef4444">❌ ${d.error||'Save failed'}</span>`;}
+  });
+}
+
+function testWebhook() {
+  const url = document.getElementById('dc-webhook').value.trim();
+  const s = document.getElementById('dc-status');
+  if (!url) { s.innerHTML='<span style="color:#f59e0b">⚠️ Enter a webhook URL first</span>'; return; }
+  s.innerHTML='<span style="color:var(--muted)">⏳ Sending test...</span>';
+  fetch('/admin/test-discord-webhook', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({webhook_url:url})})
+  .then(r=>r.json()).then(d=>{
+    if(d.success){s.innerHTML='<span style="color:#10b981">✅ Test message sent to Discord!</span>';}
+    else{s.innerHTML=`<span style="color:#ef4444">❌ ${d.error||'Failed'}</span>`;}
+  });
+}
+function goTab(tab,el){document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.si').forEach(s=>s.classList.remove('active'));document.getElementById('pane-'+tab).classList.add('active');if(el)el.classList.add('active');document.getElementById('tbTitle').textContent=titles[tab]||tab;document.getElementById('tbCrumb').textContent=titles[tab]||tab;}
+function showToast(msg,type='ok'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type==='error'?'error':'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
+
+// Sale preview
+function updateSalePreview(){
+  document.getElementById('salePreviewPct').textContent=document.getElementById('sale-percent').value+'%';
+  document.getElementById('salePreviewLabel').textContent=document.getElementById('sale-label').value;
+  document.getElementById('salePreviewSub').textContent=document.getElementById('sale-subtitle').value;
+  document.getElementById('salePreviewBox').style.opacity=document.getElementById('sale-active').checked?'1':'0.4';
+}
+
+// Color sync
+document.addEventListener('input',e=>{
+  if(e.target.classList.contains('f-color')){const row=e.target.closest('.plan-row');if(row)row.querySelector('.f-color-txt').value=e.target.value;}
+  if(e.target.classList.contains('f-color-txt')){const row=e.target.closest('.plan-row');if(row)row.querySelector('.f-color').value=e.target.value;}
+  if(e.target.classList.contains('v-color')){const row=e.target.closest('.plan-row');if(row)row.querySelector('.v-color-txt').value=e.target.value;}
+  if(e.target.classList.contains('v-color-txt')){const row=e.target.closest('.plan-row');if(row)row.querySelector('.v-color').value=e.target.value;}
+});
+
+// ── ADD ROWS ──────────────────────────────────────────────────
+function mkEmojiBlock(defaultEmoji, cls) {
+  return `<div>
+    <div style="font-size:0.68rem;font-weight:800;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Plan Emoji</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="emoji-btn" onclick="openEmojiPicker(this)">
+        <span class="e-val">${defaultEmoji}</span>
+        <span class="e-hint">click to change</span>
+      </div>
+      <input type="hidden" class="${cls}" value="${defaultEmoji}">
+      <span style="font-size:0.72rem;color:var(--muted)">This emoji<br>shows on<br>the website</span>
+    </div>
+  </div>`;
+}
+
+function addMcPlan(){
+  const c=document.getElementById('mcPlansContainer');
+  const d=document.createElement('div');d.className='plan-row';d.innerHTML=`
+    <div class="plan-row-head"><input value="New Plan" class="f-name"><input value="4GB" class="f-ram"><input value="100%" class="f-cpu"><input value="10GB NVMe" class="f-storage"><input value="99" type="number" class="f-mo"><input value="990" type="number" class="f-yr"><input value="2499" type="number" class="f-li"></div>
+    <div style="margin-bottom:10px"><input value="Description here." class="f-desc" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;width:100%"></div>
+    <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+      <div style="flex:0 0 160px"><div style="font-size:0.68rem;font-weight:800;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px">Plan Color</div><div style="display:flex;align-items:center;gap:8px"><input type="color" value="#8b5cf6" class="f-color" style="width:36px;height:32px;border-radius:6px;border:1px solid var(--bdr);background:none;cursor:pointer;padding:2px"><input value="#8b5cf6" class="f-color-txt" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'JetBrains Mono',monospace;outline:none;width:100px"></div></div>
+      ${mkEmojiBlock('⛏️','f-emoji')}
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:22px"><label class="toggle-wrap"><input type="checkbox" class="f-popular"><span>⭐ Popular</span></label><label class="toggle-wrap"><input type="checkbox" class="f-soldout"><span>⛔ Sold Out</span></label></div>
+      <div style="margin-top:22px;margin-left:auto"><button class="btn btn-danger btn-xs" onclick="this.closest('.plan-row').remove()">🗑️ Remove</button></div>
+    </div>`;c.appendChild(d);}
+
+function addVpsPlan(){
+  const c=document.getElementById('vpsPlansContainer');
+  const d=document.createElement('div');d.className='plan-row vps-plan-row';d.innerHTML=`
+    <div class="plan-row-head" style="grid-template-columns:1.4fr 0.7fr 0.6fr 1fr 1fr 0.8fr 0.8fr"><input value="VPS New" class="v-name"><input value="2" type="number" class="v-cpu"><input value="2GB" class="v-ram"><input value="40GB NVMe" class="v-storage"><input value="2TB" class="v-bw"><input value="299" type="number" class="v-mo"><input value="2990" type="number" class="v-yr"></div>
+    <div style="margin-bottom:10px"><input value="Description" class="v-desc" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;width:100%"></div>
+    <div style="margin-bottom:10px"><div style="font-size:0.68rem;font-weight:800;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px">OS Options</div><input value="Ubuntu 22.04, Debian 12" class="v-os" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;width:100%"></div>
+    <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+      <div style="flex:0 0 160px"><div style="font-size:0.68rem;font-weight:800;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px">Color</div><div style="display:flex;align-items:center;gap:8px"><input type="color" value="#06b6d4" class="v-color" style="width:36px;height:32px;border-radius:6px;border:1px solid var(--bdr);background:none;cursor:pointer;padding:2px"><input value="#06b6d4" class="v-color-txt" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'JetBrains Mono',monospace;outline:none;width:100px"></div></div>
+      ${mkEmojiBlock('🖥️','v-emoji')}
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:22px"><label class="toggle-wrap"><input type="checkbox" class="v-popular"><span>⭐ Popular</span></label><label class="toggle-wrap"><input type="checkbox" class="v-soldout"><span>⛔ Sold Out</span></label></div>
+      <div style="margin-top:22px;margin-left:auto"><button class="btn btn-danger btn-xs" onclick="this.closest('.plan-row').remove()">🗑️ Remove</button></div>
+    </div>`;c.appendChild(d);}
+
+function addFeat(){const c=document.getElementById('featContainer');const d=document.createElement('div');d.style.cssText='display:grid;grid-template-columns:52px 1fr 2.5fr 40px;gap:9px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03)';d.innerHTML=`<input value="⚡" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px;text-align:center;font-size:1.2rem;color:var(--text);outline:none" class="feat-icon"><input value="New Feature" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.855rem;color:var(--text);font-family:'Syne',sans-serif;outline:none" class="feat-title"><input value="Description." style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.855rem;color:var(--text);font-family:'Syne',sans-serif;outline:none" class="feat-desc"><button class="btn btn-danger btn-xs" onclick="this.closest('div').remove()">✕</button>`;c.appendChild(d);}
+function addFaq(){const c=document.getElementById('faqContainer');const d=document.createElement('div');d.style.cssText='display:grid;grid-template-columns:1fr 2fr 40px;gap:9px;align-items:start;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03)';d.innerHTML=`<input value="Question?" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.855rem;color:var(--text);font-family:'Syne',sans-serif;outline:none" class="faq-q"><textarea rows="2" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.855rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;resize:vertical" class="faq-a">Answer.</textarea><button class="btn btn-danger btn-xs" style="margin-top:2px" onclick="this.closest('div').remove()">✕</button>`;c.appendChild(d);}
+function addTest(){const c=document.getElementById('testContainer');const d=document.createElement('div');d.style.cssText='display:grid;grid-template-columns:0.8fr 0.8fr 0.5fr 2fr 40px;gap:9px;align-items:start;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03)';d.innerHTML=`<input value="Username" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none" class="t-name"><input value="Role" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none" class="t-role"><input value="5" type="number" min="1" max="5" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none" class="t-stars"><textarea rows="2" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.82rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;resize:vertical" class="t-text">Great!</textarea><button class="btn btn-danger btn-xs" style="margin-top:2px" onclick="this.closest('div').remove()">✕</button>`;c.appendChild(d);}
+function addAnn(){const c=document.getElementById('annContainer');const d=document.createElement('div');d.style.cssText='background:rgba(255,255,255,0.018);border:1px solid var(--bdr);border-radius:11px;padding:14px;margin-bottom:9px';d.innerHTML=`<div class="form-row" style="margin-bottom:10px"><div class="fg" style="margin:0"><label>Title</label><input value="Announcement" class="a-title"></div><div class="fg" style="margin:0"><label>Type</label><select class="a-type" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:8px;padding:8px 12px;font-size:0.855rem;color:var(--text);font-family:'Syne',sans-serif;outline:none;width:100%"><option value="info">Info</option><option value="warning">Warning</option><option value="success">Success</option></select></div></div><div class="fg" style="margin-bottom:10px"><label>Message</label><input value="Message here." class="a-msg"></div><div style="display:flex;justify-content:space-between;align-items:center"><label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:0.8rem;color:var(--muted2)"><input type="checkbox" class="a-active" checked style="width:auto"> Active</label><button class="btn btn-danger btn-xs" onclick="this.closest('div').closest('div').remove()">Remove</button></div>`;c.appendChild(d);}
+function addCoupon(){const c=document.getElementById('couponContainer');const d=document.createElement('div');d.style.cssText='display:grid;grid-template-columns:1.2fr 1fr 1fr 80px 40px;gap:9px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03)';d.innerHTML=`<input value="NEWCODE" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.855rem;color:var(--text);font-family:'JetBrains Mono',monospace;outline:none;text-transform:uppercase" class="c-code"><select class="c-type" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.855rem;color:var(--text);font-family:'Syne',sans-serif;outline:none"><option value="percent">Percent %</option><option value="flat">Flat ₹</option></select><input value="10" type="number" style="background:rgba(255,255,255,0.04);border:1px solid var(--bdr);border-radius:7px;padding:7px 10px;font-size:0.855rem;color:var(--text);font-family:'Syne',sans-serif;outline:none" class="c-disc"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.8rem;color:var(--muted2)"><input type="checkbox" class="c-active" checked style="width:auto"> Active</label><button class="btn btn-danger btn-xs" onclick="this.closest('div').remove()">✕</button>`;c.appendChild(d);}
+
+function filterOrders(q){document.querySelectorAll('#ordersBody tr[data-search]').forEach(r=>{r.style.display=r.dataset.search.toLowerCase().includes(q.toLowerCase())?'':'none'});}
+function filterUsers(q){document.querySelectorAll('#usersBody tr[data-search]').forEach(r=>{r.style.display=r.dataset.search.toLowerCase().includes(q.toLowerCase())?'':'none'});}
+function toggleUser(uid){fetch(`/admin/user/${uid}/toggle`,{method:'POST'}).then(r=>r.json()).then(d=>{const b=document.getElementById('ustatus-'+uid);if(d.active){b.textContent='ACTIVE';b.className='badge b-green';}else{b.textContent='SUSPENDED';b.className='badge b-red';}showToast(d.active?'✅ Activated':'⚠️ Suspended');});}
+
+function toggleAdmin(uid, username, btn) {
+  const isAdmin = btn.textContent.includes('Revoke');
+  const action = isAdmin ? 'revoke' : 'grant';
+  if (!isAdmin && !confirm(`Make "${username}" an admin?\nThey will be able to log into the admin panel.`)) return;
+  if (isAdmin && !confirm(`Revoke admin from "${username}"?`)) return;
+  btn.disabled = true; btn.textContent = '⏳...';
+  fetch(`/admin/user/${uid}/set-role`, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({role: isAdmin ? 'user' : 'admin'})
+  }).then(r => r.json()).then(d => {
+    if (d.success) {
+      const nameCell = document.querySelector(`#urow-${uid} td:first-child`);
+      if (!isAdmin) {
+        btn.textContent = '👑 Revoke Admin';
+        btn.className = 'btn btn-danger btn-xs';
+        btn.onclick = () => toggleAdmin(uid, username, btn);
+        if (nameCell && !nameCell.querySelector('.admin-crown')) {
+          nameCell.insertAdjacentHTML('beforeend', ' <span class="admin-crown" style="font-size:0.65rem;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;padding:2px 6px;border-radius:5px;font-weight:900;letter-spacing:.05em">👑 ADMIN</span>');
+        }
+        showToast(`👑 ${username} is now an admin!`);
+      } else {
+        btn.textContent = '👑 Make Admin';
+        btn.className = 'btn btn-purple btn-xs';
+        btn.onclick = () => toggleAdmin(uid, username, btn);
+        const crown = nameCell?.querySelector('.admin-crown');
+        if (crown) crown.remove();
+        showToast(`✅ Admin revoked from ${username}`);
+      }
+      btn.disabled = false;
+    } else {
+      showToast('❌ ' + (d.error||'Failed'), 'error');
+      btn.disabled = false;
+    }
+  }).catch(() => { showToast('❌ Error','error'); btn.disabled=false; });
+}
+function deleteUser(uid,name){document.getElementById('modalTitle').textContent='Delete User';document.getElementById('modalSub').textContent=`Delete "${name}"? This is permanent.`;document.getElementById('modalConfirm').onclick=()=>{fetch(`/admin/user/${uid}/delete`,{method:'POST'}).then(()=>{document.getElementById('urow-'+uid)?.remove();closeModal();showToast('🗑️ Deleted');});};document.getElementById('confirmModal').classList.add('open');}
+function closeModal(){document.getElementById('confirmModal').classList.remove('open');}
+function updateOrderStatus(oid,status){fetch(`/admin/order/${oid}/status`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})}).then(()=>showToast('✅ Status updated'));}
+
+// ── Accept order → set active + auto-provision Pterodactyl ───────
+function acceptOrder(oid, btn) {
+  btn.disabled=true; btn.textContent='⏳ Processing...';
+  fetch(`/admin/order/${oid}/accept`, {method:'POST', headers:{'Content-Type':'application/json'}})
+  .then(r=>r.json()).then(d=>{
+    if (d.error) { showToast('❌ '+d.error,'error'); btn.disabled=false; btn.textContent='✅ Accept & Provision'; return; }
+    const sb=document.getElementById('ostatus-'+oid);
+    if(sb){sb.textContent='ACTIVE';sb.className='badge b-green';}
+    btn.textContent='✅ Accepted';
+    // Show cPanel result for VPS, Pterodactyl result for MC
+    if (d.provision_cpanel) showCpProvisionResult(d.provision_cpanel);
+    else if (d.provision_ptero) showProvisionResult(d.provision_ptero, oid);
+    else if (d.provision) showProvisionResult(d.provision, oid);
+  }).catch(()=>{showToast('❌ Network error','error');btn.disabled=false;btn.textContent='✅ Accept & Provision';});
+}
+
+function showCpProvisionResult(prov) {
+  const modal=document.getElementById('provisionModal');
+  const sub=document.getElementById('provSub');
+  const body=document.getElementById('provBody');
+  if(!prov||!prov.provisioned){
+    sub.textContent='cPanel provisioning skipped';
+    body.innerHTML=`<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:12px;color:#f59e0b">⚠️ ${prov?.reason||prov?.error||'Configure cPanel in Admin → cPanel (VPS) tab.'}</div>`;
+  } else {
+    sub.textContent='🖥️ cPanel account created!';
+    body.innerHTML=`<div style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.2);border-radius:10px;padding:14px">
+      <div style="font-weight:800;color:#22d3ee;margin-bottom:10px">🖥️ cPanel Credentials</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;line-height:2.2">
+        <div>🌐 URL: <a href="${prov.cp_url}" target="_blank" style="color:#a78bfa">${prov.cp_url}</a></div>
+        <div>👤 Username: <strong>${prov.cp_username}</strong></div>
+        <div>🔑 Password: <strong>${prov.cp_password}</strong></div>
+        <div>🌍 Domain: <strong>${prov.cp_domain}</strong></div>
+        <div>📡 IP: <strong>${prov.ip||'—'}</strong></div>
+        <div>🔵 NS1: <strong>${prov.nameserver1||'—'}</strong></div>
+        <div>🔵 NS2: <strong>${prov.nameserver2||'—'}</strong></div>
+      </div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:10px">💡 Client sees this in their dashboard → My VPS tab</div>
+    </div>`;
+  }
+  showToast(prov?.provisioned?'🖥️ cPanel created!':'⚠️ Provisioning skipped');
+  modal.classList.add('open');
+}
+
+function rejectOrder(oid, btn) {
+  if(!confirm('Reject this order?')) return;
+  btn.disabled=true;
+  fetch(`/admin/order/${oid}/status`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'cancelled'})})
+  .then(()=>{const sb=document.getElementById('ostatus-'+oid);if(sb){sb.textContent='CANCELLED';sb.className='badge b-red';}btn.textContent='✗ Rejected';showToast('Order rejected');});
+}
+
+function provisionOnly(oid, btn) {
+  btn.disabled=true; btn.textContent='⏳ Provisioning...';
+  fetch(`/admin/provision-order/${oid}`,{method:'POST'})
+  .then(r=>r.json()).then(d=>{
+    btn.textContent='🤖 Done'; showProvisionResult(d, oid);
+  }).catch(()=>{showToast('❌ Network error','error');btn.disabled=false;btn.textContent='🤖 Provision Now';});
+}
+
+function showProvisionResult(prov, oid) {
+  const modal=document.getElementById('provisionModal');
+  const body=document.getElementById('provBody');
+  const sub=document.getElementById('provSub');
+  if (!prov || !prov.provisioned) {
+    sub.textContent = prov?.reason || 'Pterodactyl not configured';
+    body.innerHTML = `<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:12px;color:#f59e0b">
+      ⚠️ Order marked as active but Pterodactyl provisioning skipped.<br>
+      ${prov?.reason || 'Configure Pterodactyl in Admin → Pterodactyl tab to enable auto-provisioning.'}
+    </div>`;
+  } else {
+    const servers = prov.servers||[];
+    const ok = servers.filter(s=>s.success).length;
+    sub.textContent = `${ok}/${servers.length} server(s) provisioned successfully`;
+    body.innerHTML = `
+      <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:12px;margin-bottom:12px">
+        <div style="font-weight:800;color:#10b981;margin-bottom:8px">🎉 Pterodactyl Panel Credentials</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;line-height:2">
+          <div>🌐 Panel: <a href="${prov.panel_url}" target="_blank" style="color:#a78bfa">${prov.panel_url}</a></div>
+          <div>👤 Username: <strong>${prov.username}</strong></div>
+          <div>🔑 Password: <strong>${prov.password}</strong></div>
+        </div>
+      </div>
+      ${servers.map(s=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:8px;background:${s.success?'rgba(16,185,129,0.05)':'rgba(239,68,68,0.05)'};border:1px solid ${s.success?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)'};border-radius:8px;margin-bottom:6px">
+          <span>${s.success?'✅':'❌'}</span>
+          <div><div style="font-weight:700;font-size:0.82rem">${s.plan}</div>
+          <div style="font-size:0.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace">${s.identifier||s.error||''}</div></div>
+        </div>`).join('')}
+      <div style="font-size:0.72rem;color:var(--muted);margin-top:8px">💡 Customer sees these credentials on their Order Success page</div>
+    `;
+  }
+  showToast(prov?.provisioned ? '🤖 Provisioning complete!' : '⚠️ No provisioning');
+  modal.classList.add('open');
+}
+function testPtero(){
+  const btn=document.getElementById('pteroTestBtn');const result=document.getElementById('pteroTestResult');
+  const url=document.getElementById('ptero-url')?.value||'';const key=document.getElementById('ptero-key')?.value||'';
+  if(!url||!key){result.style.display='block';result.style.color='#ef4444';result.textContent='❌ Enter Panel URL and API Key first.';return;}
+  btn.textContent='⏳ Testing...';btn.disabled=true;result.style.display='none';
+  const ptero={enabled:document.getElementById('ptero-enabled')?.checked||false,panel_url:url,api_key:key,location_id:+(document.getElementById('ptero-loc')?.value||1),egg_id:+(document.getElementById('ptero-egg')?.value||1),docker_image:document.getElementById('ptero-docker')?.value||'',startup:document.getElementById('ptero-startup')?.value||'',default_variables:{SERVER_JARFILE:document.getElementById('ptero-jarfile')?.value||'server.jar',MINECRAFT_VERSION:document.getElementById('ptero-mcver')?.value||'latest'}};
+  fetch('/admin/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pterodactyl:ptero})})
+  .then(()=>fetch('/admin/test-pterodactyl',{method:'POST'}))
+  .then(r=>r.json()).then(d=>{result.style.display='block';if(d.success){result.style.color='#10b981';result.textContent='✅ '+d.message;}else{result.style.color='#ef4444';result.textContent='❌ '+d.error;}btn.textContent='🔍 Test Connection';btn.disabled=false;})
+  .catch(()=>{result.style.display='block';result.style.color='#ef4444';result.textContent='❌ Network error — check panel URL';btn.textContent='🔍 Test Connection';btn.disabled=false;});
+}
+
+function saveAll(){
+  const plans=[...document.querySelectorAll('#mcPlansContainer .plan-row')].map((r,i)=>({
+    id:i+1,name:r.querySelector('.f-name').value,ram:r.querySelector('.f-ram').value,
+    cpu:r.querySelector('.f-cpu').value,storage:r.querySelector('.f-storage').value,
+    price_monthly:+r.querySelector('.f-mo').value,price_yearly:+r.querySelector('.f-yr').value,
+    price_lifetime:+r.querySelector('.f-li').value,color:r.querySelector('.f-color-txt')?.value||'#8b5cf6',
+    description:r.querySelector('.f-desc')?.value||'',
+    emoji:r.querySelector('.f-emoji')?.value||'⛏️',
+    popular:r.querySelector('.f-popular')?.checked||false,sold_out:r.querySelector('.f-soldout')?.checked||false
+  }));
+  const vps_plans=[...document.querySelectorAll('#vpsPlansContainer .plan-row')].map((r,i)=>({
+    id:i+1,name:r.querySelector('.v-name').value,cpu_cores:+r.querySelector('.v-cpu').value,
+    ram:r.querySelector('.v-ram').value,storage:r.querySelector('.v-storage').value,
+    bandwidth:r.querySelector('.v-bw').value,
+    price_monthly:+r.querySelector('.v-mo').value,price_yearly:+r.querySelector('.v-yr').value,
+    color:r.querySelector('.v-color-txt')?.value||'#06b6d4',
+    description:r.querySelector('.v-desc')?.value||'',
+    emoji:r.querySelector('.v-emoji')?.value||'🖥️',
+    os:r.querySelector('.v-os')?.value.split(',').map(s=>s.trim()).filter(Boolean)||[],
+    popular:r.querySelector('.v-popular')?.checked||false,sold_out:r.querySelector('.v-soldout')?.checked||false
+  }));
+  const features=[...document.querySelectorAll('#featContainer>div')].map(r=>({icon:r.querySelector('.feat-icon').value,title:r.querySelector('.feat-title').value,desc:r.querySelector('.feat-desc').value}));
+  const faqs=[...document.querySelectorAll('#faqContainer>div')].map(r=>({q:r.querySelector('.faq-q').value,a:r.querySelector('.faq-a').value}));
+  const testimonials=[...document.querySelectorAll('#testContainer>div')].map(r=>({name:r.querySelector('.t-name').value,role:r.querySelector('.t-role').value,stars:+r.querySelector('.t-stars').value,text:r.querySelector('.t-text').value}));
+  const announcements=[...document.querySelectorAll('#annContainer>div')].map(r=>({id:Date.now(),title:r.querySelector('.a-title').value,message:r.querySelector('.a-msg').value,type:r.querySelector('.a-type').value,active:r.querySelector('.a-active').checked}));
+  const coupons=[...document.querySelectorAll('#couponContainer>div')].map(r=>({code:r.querySelector('.c-code').value.toUpperCase(),type:r.querySelector('.c-type').value,discount:+r.querySelector('.c-disc').value,active:r.querySelector('.c-active').checked}));
+  const stats={servers:document.getElementById('s-servers')?.value||'500+',uptime:document.getElementById('s-uptime')?.value||'99.9%',support:document.getElementById('s-support')?.value||'24/7',gamers:document.getElementById('s-gamers')?.value||'10,000+'};
+  const site={name:document.getElementById('cfg-name')?.value||'StrengthCloud',discord:document.getElementById('cfg-discord')?.value||'',tagline:document.getElementById('cfg-tagline')?.value||''};
+  const admin={username:document.getElementById('cfg-auser')?.value||'admin',password:document.getElementById('cfg-apw')?.value||''};
+  const sale={active:document.getElementById('sale-active')?.checked||false,percent:+document.getElementById('sale-percent')?.value||30,label:document.getElementById('sale-label')?.value||'SALE',subtitle:document.getElementById('sale-subtitle')?.value||'',expires:document.getElementById('sale-expires')?.value||''};
+  const payment={
+    razorpay_key_id:document.getElementById('pm-rz-key')?.value||'',
+    razorpay_key_secret:document.getElementById('pm-rz-secret')?.value||'',
+    upi_id:document.getElementById('pm-upi-id')?.value||'',
+    upi_name:document.getElementById('pm-upi-name')?.value||'',
+    upi_qr:document.getElementById('pm-upi-qr')?.value||'',
+    bank_name:document.getElementById('pm-bank-name')?.value||'',
+    bank_holder:document.getElementById('pm-bank-holder')?.value||'',
+    bank_account:document.getElementById('pm-bank-account')?.value||'',
+    bank_ifsc:document.getElementById('pm-bank-ifsc')?.value||'',
+    currency:'INR'
+  };
+  const pterodactyl={
+    enabled:document.getElementById('ptero-enabled')?.checked||false,
+    panel_url:document.getElementById('ptero-url')?.value||'',
+    api_key:document.getElementById('ptero-key')?.value||'',
+    location_id:+document.getElementById('ptero-loc')?.value||1,
+    egg_id:+document.getElementById('ptero-egg')?.value||1,
+    docker_image:document.getElementById('ptero-docker')?.value||'',
+    startup:document.getElementById('ptero-startup')?.value||'',
+    default_variables:{
+      SERVER_JARFILE:document.getElementById('ptero-jarfile')?.value||'server.jar',
+      MINECRAFT_VERSION:document.getElementById('ptero-mcver')?.value||'latest',
+      BUILD_TYPE:document.getElementById('ptero-buildtype')?.value||'recommended',
+      MC_VERSION:document.getElementById('ptero-mcversion2')?.value||'latest'
+    }
+  };
+  const cpanel={
+    enabled: document.getElementById('cp-enabled')?.checked||false,
+    whm_url: document.getElementById('cp-whm-url')?.value||'',
+    api_token: document.getElementById('cp-api-token')?.value||'',
+    ip_address: document.getElementById('cp-ip')?.value||'',
+    default_package: document.getElementById('cp-package')?.value||'default',
+    nameserver1: document.getElementById('cp-ns1')?.value||'',
+    nameserver2: document.getElementById('cp-ns2')?.value||'',
+  };
+  fetch('/admin/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plans,vps_plans,features,faqs,testimonials,announcements,coupons,stats,site,admin,sale,payment,pterodactyl,cpanel})})
+  .then(r=>r.json()).then(()=>showToast('✅ All changes saved!'));
+}
+
+// ── cPanel functions ─────────────────────────────────────────────
+function testCpanel() {
+  const btn = event.target; btn.textContent='⏳ Testing...'; btn.disabled=true;
+  saveAll();
+  setTimeout(()=>{
+    fetch('/admin/test-cpanel',{method:'POST'})
+    .then(r=>r.json()).then(d=>{
+      const el=document.getElementById('cpTestResult');
+      el.style.display='block';
+      el.style.color = d.success?'#10b981':'#ef4444';
+      el.textContent = d.success? '✅ '+d.message : '❌ '+(d.error||'Failed');
+      btn.textContent='🔌 Test Connection'; btn.disabled=false;
+    }).catch(()=>{document.getElementById('cpTestResult').textContent='❌ Network error';btn.textContent='🔌 Test Connection';btn.disabled=false;});
+  },800);
+}
+
+function loadCpAccounts() {
+  document.getElementById('cpLoading').style.display='block';
+  document.getElementById('cpTableWrap').style.display='none';
+  document.getElementById('cpLoading').innerHTML='<div style="font-size:2rem;margin-bottom:8px">⏳</div><div style="font-weight:700">Loading cPanel accounts...</div>';
+  fetch('/admin/cpanel-accounts').then(r=>r.json()).then(d=>{
+    if(d.error){document.getElementById('cpLoading').innerHTML=`<div style="font-size:2rem">❌</div><div style="color:#ef4444;font-weight:700">${d.error}</div>`;return;}
+    renderCpAccounts(d.accounts||[]);
+    const wl=document.getElementById('whmLink'); if(wl&&d.whm_url)wl.href=d.whm_url;
+  }).catch(e=>{document.getElementById('cpLoading').innerHTML=`<div style="font-size:2rem">❌</div><div style="color:#ef4444;font-weight:700">${e.message}</div>`;});
+}
+
+function renderCpAccounts(accounts) {
+  const body=document.getElementById('cpBody');
+  const loading=document.getElementById('cpLoading');
+  const wrap=document.getElementById('cpTableWrap');
+  if(!accounts.length){loading.innerHTML='<div style="padding:28px;color:var(--muted)">No accounts found</div>';return;}
+  body.innerHTML=accounts.map(a=>{
+    const susp=a.suspended=='1'||a.suspended===true;
+    const disk=a.diskused||'—';
+    return `<tr id="cpacc-${a.user}" data-search="${a.user} ${a.domain}">
+      <td style="font-weight:800;font-family:'JetBrains Mono',monospace">${a.user||'—'}</td>
+      <td style="font-size:0.82rem">${a.domain||'—'}</td>
+      <td style="font-size:0.8rem;color:var(--muted2)">${disk} MB</td>
+      <td><span class="badge ${susp?'b-red':'b-green'}" id="cpstatus-${a.user}">${susp?'⛔ SUSPENDED':'✅ ACTIVE'}</span></td>
+      <td><div style="display:flex;gap:5px;flex-wrap:wrap">
+        ${susp
+          ?`<button class="btn btn-sm" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;font-size:0.7rem;padding:5px 9px;border-radius:7px;cursor:pointer;font-weight:800" onclick="cpSuspend('${a.user}',false,this)">▶ Unsuspend</button>`
+          :`<button class="btn btn-sm" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;font-size:0.7rem;padding:5px 9px;border-radius:7px;cursor:pointer;font-weight:800" onclick="cpSuspend('${a.user}',true,this)">⛔ Suspend</button>`
+        }
+        <a href="${document.getElementById('whmLink').href}:2087/scripts2/suspendacct?user=${a.user}" target="_blank" class="btn btn-ghost btn-xs" style="font-size:0.7rem">↗ WHM</a>
+      </div></td>
+    </tr>`;
+  }).join('');
+  loading.style.display='none'; wrap.style.display='block';
+}
+
+function filterCpAccounts(q) {
+  document.querySelectorAll('#cpBody tr[data-search]').forEach(r=>{
+    r.style.display=r.dataset.search.includes(q.toLowerCase())?'':'none';
+  });
+}
+
+function cpSuspend(user, suspend, btn) {
+  btn.disabled=true; btn.textContent=suspend?'⏳...':'⏳...';
+  fetch('/admin/cpanel-suspend',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({username:user,suspend,reason:'Suspended by admin'})})
+  .then(r=>r.json()).then(d=>{
+    if(d.success){
+      const badge=document.getElementById('cpstatus-'+user);
+      if(suspend){badge.textContent='⛔ SUSPENDED';badge.className='badge b-red';btn.textContent='▶ Unsuspend';btn.style.background='linear-gradient(135deg,#10b981,#059669)';btn.onclick=()=>cpSuspend(user,false,btn);}
+      else{badge.textContent='✅ ACTIVE';badge.className='badge b-green';btn.textContent='⛔ Suspend';btn.style.background='linear-gradient(135deg,#ef4444,#dc2626)';btn.onclick=()=>cpSuspend(user,true,btn);}
+      btn.disabled=false; showToast(suspend?'⛔ Account suspended':'✅ Account unsuspended');
+    } else { showToast('❌ '+(d.error||'Failed'),'error'); btn.disabled=false; }
+  }).catch(()=>{showToast('❌ Network error','error');btn.disabled=false;});
+}
+
+// ══════════════════════════════════════════════════════════════
+// SERVER MANAGER — Pterodactyl Live Control
+// ══════════════════════════════════════════════════════════════
+let allServers = [];
+
+function loadPteroServers() {
+  const loading = document.getElementById('srvLoading');
+  const tableWrap = document.getElementById('srvTableWrap');
+  loading.innerHTML = '<div style="font-size:2rem;margin-bottom:10px">⏳</div><div style="font-weight:700">Loading servers from Pterodactyl...</div>';
+  loading.style.display = 'block';
+  tableWrap.style.display = 'none';
+
+  fetch('/admin/ptero-servers')
+  .then(r => r.json())
+  .then(d => {
+    if (d.error) {
+      loading.innerHTML = `<div style="font-size:2rem;margin-bottom:10px">❌</div><div style="font-weight:700;color:#ef4444">${d.error}</div><div style="font-size:0.78rem;color:var(--muted2);margin-top:6px">Check Admin → Pterodactyl settings</div>`;
+      return;
+    }
+    allServers = d.servers || [];
+    renderServers(allServers);
+    // Set panel link
+    if (d.panel_url) {
+      document.getElementById('panelLink').href = d.panel_url;
+    }
+    // Stats
+    const suspended = allServers.filter(s => s.suspended).length;
+    document.getElementById('srvTotal').textContent = allServers.length;
+    document.getElementById('srvRunning').textContent = allServers.length - suspended;
+    document.getElementById('srvSuspended').textContent = suspended;
+    document.getElementById('srvUsers').textContent = d.user_count || '—';
+  })
+  .catch(e => {
+    loading.innerHTML = `<div style="font-size:2rem;margin-bottom:10px">❌</div><div style="font-weight:700;color:#ef4444">Connection failed</div><div style="font-size:0.78rem;color:var(--muted2);margin-top:6px">${e.message}</div>`;
+  });
+}
+
+function renderServers(servers) {
+  const loading = document.getElementById('srvLoading');
+  const tableWrap = document.getElementById('srvTableWrap');
+  const body = document.getElementById('srvBody');
+
+  if (!servers.length) {
+    loading.innerHTML = '<div style="font-size:2rem;margin-bottom:10px">📭</div><div style="font-weight:700">No servers found on panel</div>';
+    loading.style.display = 'block';
+    tableWrap.style.display = 'none';
+    return;
+  }
+
+  body.innerHTML = servers.map(s => {
+    const susp = s.suspended;
+    const ramGB = s.limits?.memory ? (s.limits.memory >= 1024 ? (s.limits.memory/1024).toFixed(1)+'GB' : s.limits.memory+'MB') : '—';
+    const cpu = s.limits?.cpu ? (s.limits.cpu === 0 ? '∞' : s.limits.cpu+'%') : '—';
+    const disk = s.limits?.disk ? (s.limits.disk >= 1024 ? (s.limits.disk/1024).toFixed(0)+'GB' : s.limits.disk+'MB') : '—';
+    return `
+    <tr id="srow-${s.id}" data-search="${(s.name||'').toLowerCase()} ${(s.user_email||'').toLowerCase()} ${(s.identifier||'')}">
+      <td>
+        <div style="font-weight:800;font-size:0.85rem">${s.name||'—'}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--muted)">${s.identifier||''}</div>
+      </td>
+      <td>
+        <div style="font-weight:700;font-size:0.82rem">${s.user_username||'—'}</div>
+        <div style="font-size:0.68rem;color:var(--muted)">${s.user_email||''}</div>
+      </td>
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:700;color:#a78bfa">${ramGB}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:0.82rem">${cpu}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:0.82rem">${disk}</td>
+      <td style="font-size:0.78rem;color:var(--muted2)">${s.node||'—'}</td>
+      <td>
+        <span id="sstatus-${s.id}" class="badge ${susp ? 'b-red' : 'b-green'}">${susp ? '⛔ SUSPENDED' : '✅ ACTIVE'}</span>
+      </td>
+      <td>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          ${susp
+            ? `<button class="btn btn-sm" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;font-size:0.7rem;padding:5px 9px;border-radius:7px;cursor:pointer;font-weight:800" onclick="suspendServer(${s.id},false,this)">▶ Unsuspend</button>`
+            : `<button class="btn btn-sm" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;font-size:0.7rem;padding:5px 9px;border-radius:7px;cursor:pointer;font-weight:800" onclick="suspendServer(${s.id},true,this)">⛔ Suspend</button>`
+          }
+          <button class="btn btn-sm" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border:none;font-size:0.7rem;padding:5px 9px;border-radius:7px;cursor:pointer;font-weight:800" onclick="openEditResources(${s.id},'${s.name}',${s.limits?.memory||1024},${s.limits?.cpu||100},${s.limits?.disk||10240})">⚙️ Edit</button>
+          <button class="btn btn-sm" style="background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;border:none;font-size:0.7rem;padding:5px 9px;border-radius:7px;cursor:pointer;font-weight:800" onclick="deleteServer(${s.id},'${(s.name||'').replace(/'/g,'')}',this)">🗑 Delete</button>
+          <a href="${document.getElementById('panelLink').href}/admin/servers/${s.id}" target="_blank" class="btn btn-ghost btn-xs" style="font-size:0.7rem">↗ Panel</a>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  loading.style.display = 'none';
+  tableWrap.style.display = 'block';
+}
+
+function filterServers(q) {
+  document.querySelectorAll('#srvBody tr[data-search]').forEach(r => {
+    r.style.display = r.dataset.search.includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+function suspendServer(sid, suspend, btn) {
+  btn.disabled = true;
+  btn.textContent = suspend ? '⏳ Suspending...' : '⏳ Unsuspending...';
+  fetch('/admin/ptero-suspend', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({server_id: sid, suspend})
+  }).then(r => r.json()).then(d => {
+    if (d.success) {
+      const badge = document.getElementById('sstatus-' + sid);
+      if (suspend) {
+        badge.textContent = '⛔ SUSPENDED'; badge.className = 'badge b-red';
+        btn.textContent = '▶ Unsuspend';
+        btn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
+        btn.onclick = () => suspendServer(sid, false, btn);
+      } else {
+        badge.textContent = '✅ ACTIVE'; badge.className = 'badge b-green';
+        btn.textContent = '⛔ Suspend';
+        btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+        btn.onclick = () => suspendServer(sid, true, btn);
+      }
+      btn.disabled = false;
+      // Update stats
+      const suspended = document.querySelectorAll('#srvBody .b-red').length;
+      const total = allServers.length;
+      document.getElementById('srvSuspended').textContent = suspended;
+      document.getElementById('srvRunning').textContent = total - suspended;
+      showToast(suspend ? '⛔ Server suspended' : '✅ Server unsuspended');
+    } else {
+      showToast('❌ ' + (d.error||'Failed'), 'error');
+      btn.disabled = false;
+      btn.textContent = suspend ? '⛔ Suspend' : '▶ Unsuspend';
+    }
+  }).catch(() => { showToast('❌ Connection error','error'); btn.disabled=false; });
+}
+
+function deleteServer(sid, name, btn) {
+  // Show inline confirm state first
+  if (!btn.dataset.confirming) {
+    btn.dataset.confirming = '1';
+    btn.textContent = '⚠️ Confirm?';
+    btn.style.background = 'linear-gradient(135deg,#f59e0b,#d97706)';
+    setTimeout(() => {
+      if (btn.dataset.confirming) {
+        delete btn.dataset.confirming;
+        btn.textContent = '🗑 Delete';
+        btn.style.background = 'linear-gradient(135deg,#dc2626,#991b1b)';
+      }
+    }, 3000);
+    return;
+  }
+  // Second click — confirmed
+  delete btn.dataset.confirming;
+  btn.disabled = true;
+  btn.textContent = '⏳ Deleting...';
+  fetch('/admin/ptero-delete', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({server_id: sid})
+  }).then(r => r.json()).then(d => {
+    if (d.success) {
+      const row = document.getElementById('srow-' + sid);
+      if (row) {
+        row.style.transition = 'opacity .4s, transform .4s';
+        row.style.opacity = '0';
+        row.style.transform = 'translateX(30px)';
+        setTimeout(() => row.remove(), 420);
+      }
+      allServers = allServers.filter(s => s.id !== sid);
+      document.getElementById('srvTotal').textContent = allServers.length;
+      const suspended = document.querySelectorAll('#srvBody .b-red').length;
+      document.getElementById('srvSuspended').textContent = suspended;
+      document.getElementById('srvRunning').textContent = allServers.length - suspended;
+      showToast('🗑 Server deleted successfully');
+    } else {
+      showToast('❌ ' + (d.error||'Delete failed'), 'error');
+      btn.disabled = false;
+      btn.textContent = '🗑 Delete';
+    }
+  }).catch(() => { showToast('❌ Connection error','error'); btn.disabled=false; btn.textContent='🗑 Delete'; });
+}
+
+
+
+function openEditResources(sid, name, ram, cpu, disk) {
+  document.getElementById('editSrvId').value = sid;
+  document.getElementById('editRamSub').textContent = `Server: ${name}`;
+  document.getElementById('curRam').textContent = ram + 'MB (' + (ram>=1024?(ram/1024).toFixed(1)+'GB':ram+'MB') + ')';
+  document.getElementById('curCpu').textContent = cpu === 0 ? 'Unlimited' : cpu + '%';
+  document.getElementById('curDisk').textContent = disk + 'MB (' + (disk>=1024?(disk/1024).toFixed(0)+'GB':disk+'MB') + ')';
+  document.getElementById('newRam').value = ram;
+  document.getElementById('newCpu').value = cpu;
+  document.getElementById('newDisk').value = disk;
+  document.getElementById('editRamMsg').style.display = 'none';
+  document.getElementById('editRamModal').classList.add('open');
+}
+
+function saveServerResources() {
+  const sid = document.getElementById('editSrvId').value;
+  const ram = parseInt(document.getElementById('newRam').value);
+  const cpu = parseInt(document.getElementById('newCpu').value);
+  const disk = parseInt(document.getElementById('newDisk').value);
+  const msg = document.getElementById('editRamMsg');
+
+  if (!ram || ram < 128) { msg.style.display='block'; msg.style.color='#ef4444'; msg.textContent='❌ RAM must be at least 128MB'; return; }
+
+  msg.style.display='block'; msg.style.color='#22d3ee'; msg.textContent='⏳ Saving...';
+
+  fetch('/admin/ptero-edit-resources', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({server_id: sid, memory: ram, cpu, disk})
+  }).then(r => r.json()).then(d => {
+    if (d.success) {
+      msg.style.color = '#10b981'; msg.textContent = '✅ Resources updated!';
+      showToast('✅ Server resources updated');
+      setTimeout(() => {
+        document.getElementById('editRamModal').classList.remove('open');
+        loadPteroServers();
+      }, 1200);
+    } else {
+      msg.style.color = '#ef4444'; msg.textContent = '❌ ' + (d.error||'Failed');
+    }
+  }).catch(() => { msg.style.color='#ef4444'; msg.textContent='❌ Connection error'; });
+}
+</script>
+</body>
+</html>
